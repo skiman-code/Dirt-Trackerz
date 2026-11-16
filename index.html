@@ -854,6 +854,49 @@ function dtzShowType(type) {
 
 
 
+let dtzCurrentTrack = "";
+
+function dtzOpenTrack(name) {
+  dtzCurrentTrack = name;
+  const track = [
+    { name: "67 Speedway of Texarkana", state: "Arkansas" },
+    { name: "Boothill Speedway", state: "Louisiana" },
+    { name: "Ark-La-Tex Speedway", state: "Louisiana" }
+  ].find(t => t.name === name);
+
+  if (!track) return;
+
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="eyebrow">DIRT TRACKERZ COMMUNITY</div>
+    <h1 class="heading">${dtzEscape(track.name)}</h1>
+    <p>${dtzEscape(track.state)}</p>
+
+    <div class="card pad">
+      <h2>Track Overview</h2>
+      <p>Official track information and updates will appear here.</p>
+      <button class="btn" onclick="go('tracks')">Back to Tracks</button>
+    </div>
+
+    <div class="card pad">
+      <h2>Upcoming Events</h2>
+      <p>Event schedules will appear here.</p>
+    </div>
+
+    <div class="card pad">
+      <h2>Race Results</h2>
+      <p>Official results will appear here.</p>
+    </div>
+
+    <div class="card pad">
+      <h2>Streaming Partners</h2>
+      <p>Official broadcast links will appear here.</p>
+    </div>
+  `;
+
+  window.scrollTo(0, 0);
+}
+
 function dtzTracksPage() {
   const tracks = [
     { name: "67 Speedway of Texarkana", state: "Arkansas" },
@@ -882,7 +925,7 @@ function dtzTracksPage() {
                style="margin:12px 0">
             <h3>${dtzEscape(track.name)}</h3>
             <p>${dtzEscape(track.state)}</p>
-            <span class="tag">Track profile coming soon</span>
+           <button class="btn" onclick="dtzOpenTrack('${dtzEscape(track.name)}')">View Track Profile</button>
           </div>
         `).join('')}
       </div>
