@@ -907,7 +907,8 @@ function dtzOpenTrack(name) {
   window.scrollTo(0, 0);
 }
 
-function dtzFollowTrack(name) {
+const dtzFollowTrackOnline = (name) => window.dtzSaveTrackFollow?.(name);
+  function dtzFollowTrack(name) {
   if (!name) return;
 
   const key = "dtzFollowedTracks";
@@ -922,6 +923,7 @@ function dtzFollowTrack(name) {
   localStorage.setItem(key, JSON.stringify(followed));
 
   alert("You're now following " + name + "!");
+    dtzFollowTrackOnline(name);
 }
 
 function dtzTracksPage() {
@@ -1865,6 +1867,35 @@ window.dtzAuthSignin = async function(email, password) {
   authMessage("Successfully signed in!");
   window.closeModal?.();
 };
+
+  
+window.dtzSaveTrackFollow = async function(name) {
+  const { data: { user }, error: authError } =
+    await supabase.auth.getUser();
+
+  if (authError || !user) {
+    alert("Sign in to save followed tracks to your account.");
+    return;
+  }
+
+  const { error } = await supabase
+    .from("track_follows")
+    .upsert(
+      {
+        user_id: user.id,
+        track_name: name
+      },
+      { onConflict: "user_id,track_name" }
+    );
+
+  if (error) {
+    alert("Could not save track follow: " + error.message);
+    return;
+  }
+
+  console.log("Track follow saved:", name);
+};
+
 
 window.dtzAuthSignout = async function() {
   const { error } = await supabase.auth.signOut();
