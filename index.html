@@ -1868,6 +1868,28 @@ window.dtzAuthSignin = async function(email, password) {
   window.closeModal?.();
 };
 
+window.dtzResetPassword = async function () {
+  const password = prompt("Enter your new Dirt Trackerz password (at least 10 characters):");
+
+  if (password === null) return;
+
+  if (password.length < 10) {
+    alert("Your password must contain at least 10 characters.");
+    return;
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password: password
+  });
+
+  if (error) {
+    alert("Password reset failed: " + error.message);
+    return;
+  }
+
+  alert("Password updated successfully! You can now sign in.");
+};
+
   
 window.dtzSaveTrackFollow = async function(name) {
   const { data: { user }, error: authError } =
@@ -1940,6 +1962,10 @@ async function initializeAuth() {
   supabase.auth.onAuthStateChange(
     (event, session) => {
       setAuthUser(session?.user || null);
+   if (event === "PASSWORD_RECOVERY") {
+  window.dtzResetPassword();
+}   
+
     }
   );
 
