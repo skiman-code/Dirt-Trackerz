@@ -838,13 +838,91 @@ const DTZ_PROFILE_DETAILS = {
   }
 };
 
-function dtzShowType(type){
-  if(!DTZ_PROFILE_DETAILS[type]) return;
-  dtzSelectedType=type;
+
+function dtzShowType(type) {
+  if (!DTZ_PROFILE_DETAILS[type]) return;
+
+  dtzSelectedType = type;
+
+  if (type === 'track') {
+    go('tracks');
+    return;
+  }
+
   go('profile-detail');
 }
 
-function dtzProfilesPage(){
+
+
+function dtzTracksPage() {
+  const tracks = [
+    { name: "67 Speedway of Texarkana", state: "Arkansas" },
+    { name: "Boothill Speedway", state: "Louisiana" },
+    { name: "Ark-La-Tex Speedway", state: "Louisiana" }
+  ];
+
+  return `
+    <div class="eyebrow">DIRT TRACKERZ COMMUNITY</div>
+    <h1 class="heading">RACE TRACKS</h1>
+    <p>Discover race tracks, explore their events, and follow your favorites.</p>
+
+    <section class="card pad" style="margin-top:20px">
+      <h2>Find a Race Track</h2>
+      <input
+        id="dtzTrackSearch"
+        type="search"
+        placeholder="Search tracks by name or state..."
+        oninput="dtzFilterTracks(this.value)"
+        style="width:100%;padding:15px;margin:12px 0"
+      >
+      <div id="dtzTrackResults">
+        ${tracks.map(track => `
+          <div class="card pad dtz-track-result" 
+               data-search="${dtzEscape((track.name + ' ' + track.state).toLowerCase())}"
+               style="margin:12px 0">
+            <h3>${dtzEscape(track.name)}</h3>
+            <p>${dtzEscape(track.state)}</p>
+            <span class="tag">Track profile coming soon</span>
+          </div>
+        `).join('')}
+      </div>
+      <p id="dtzNoTracks" style="display:none">
+        No matching tracks found.
+      </p>
+    </section>
+
+    <section class="card pad" style="margin-top:20px">
+      <div class="sectionhead">
+        <h2>Tracks You Follow</h2>
+        <span class="tag">TOP 3</span>
+      </div>
+      <p>Your three most recently followed tracks will appear here once following is connected.</p>
+      <div class="notice">
+        You aren't following any tracks yet.
+      </div>
+    </section>
+  `;
+}
+
+function dtzFilterTracks(query) {
+  const term = String(query || "").trim().toLowerCase();
+  const rows = document.querySelectorAll(".dtz-track-result");
+  let visible = 0;
+
+  rows.forEach(row => {
+    const matches = row.dataset.search.includes(term);
+    row.style.display = matches ? "" : "none";
+    if (matches) visible++;
+  });
+
+  const empty = document.getElementById("dtzNoTracks");
+  if (empty) {
+    empty.style.display = visible ? "none" : "block";
+  }
+}
+
+  
+  function dtzProfilesPage(){
   return `
     <div class="eyebrow">THE DIRT RACING COMMUNITY</div>
     <h1 class="heading">COMMUNITY PROFILES</h1>
@@ -1288,6 +1366,7 @@ function go(page) {
   const pages = {
     home: dtzHome,
     profiles: dtzProfilesPage,
+    tracks: dtzTracksPage,
     "profile-detail": dtzProfileDetail,
     tonight: dtzTonightPage,
     events: dtzEventsPage,
