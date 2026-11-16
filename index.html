@@ -872,6 +872,16 @@ function dtzOpenTrack(name) {
     <h1 class="heading">${dtzEscape(track.name)}</h1>
     <p>${dtzEscape(track.state)}</p>
 
+    
+<div class="card pad" style="margin:16px 0">
+  <h2>Follow This Track</h2>
+  <p>Follow ${dtzEscape(track.name)} to keep up with racing news, upcoming events, and results.</p>
+  <button class="btn" onclick="dtzFollowTrack(dtzCurrentTrack)">
+    Follow Track
+  </button>
+</div>
+
+
     <div class="card pad">
       <h2>Track Overview</h2>
       <p>Official track information and updates will appear here.</p>
@@ -895,6 +905,23 @@ function dtzOpenTrack(name) {
   `;
 
   window.scrollTo(0, 0);
+}
+
+function dtzFollowTrack(name) {
+  if (!name) return;
+
+  const key = "dtzFollowedTracks";
+  const followed = JSON.parse(localStorage.getItem(key) || "[]");
+
+  if (followed.includes(name)) {
+    alert("You're already following " + name);
+    return;
+  }
+
+  followed.unshift(name);
+  localStorage.setItem(key, JSON.stringify(followed));
+
+  alert("You're now following " + name + "!");
 }
 
 function dtzTracksPage() {
@@ -940,9 +967,29 @@ function dtzTracksPage() {
         <span class="tag">TOP 3</span>
       </div>
       <p>Your three most recently followed tracks will appear here once following is connected.</p>
-      <div class="notice">
-        You aren't following any tracks yet.
-      </div>
+      
+${(() => {
+  let followed = [];
+  try {
+    followed = JSON.parse(localStorage.getItem("dtzFollowedTracks") || "[]");
+    if (!Array.isArray(followed)) followed = [];
+  } catch (e) {
+    followed = [];
+  }
+
+  return followed.length
+    ? followed.slice(0, 3).map(name => `
+        <div class="card pad" style="margin:10px 0">
+          <h3>${dtzEscape(name)}</h3>
+          <button class="btn"
+            onclick="dtzOpenTrack('${dtzEscape(name)}')">
+            View Track Profile
+          </button>
+        </div>
+      `).join("")
+    : `<div class="notice">You aren't following any tracks yet.</div>`;
+})()}
+
     </section>
   `;
 }
