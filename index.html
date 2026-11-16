@@ -1,0 +1,1757 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dirt Trackerz | The Home of Dirt Track Racing</title>
+<style>
+:root{
+  --red:#d71930;
+  --red2:#7d081b;
+  --gold:#dfb45c;
+  --bg:#090a0c;
+  --panel:#14171b;
+  --line:#35373b;
+  --muted:#a7adb6;
+  --white:#f8f8f8;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:radial-gradient(ellipse at top,#341019,#090a0c 55%);
+  color:var(--white);
+  font-family:Arial,Helvetica,sans-serif;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:var(--gold)}
+.wrap{max-width:1400px;margin:auto}
+.top{
+  position:sticky;top:0;z-index:30;
+  background:#0b0c10f5;
+  border-bottom:1px solid #4a2029;
+  box-shadow:0 7px 25px #0008;
+}
+.topin{display:flex;align-items:center;gap:20px;padding:12px 20px}
+.logo{
+  font-size:29px;font-weight:1000;
+  letter-spacing:-1.5px;font-style:italic;
+  white-space:nowrap;
+}
+.logo span{color:#e8b85b}
+.logo small{
+  display:block;font-size:9px;
+  letter-spacing:2.4px;color:var(--gold);
+  font-style:normal;
+}
+.search{flex:1;max-width:420px;position:relative}
+.search input{
+  width:100%;background:#20232a;
+  border:1px solid #3d4149;border-radius:12px;
+  padding:12px 15px;color:white;
+}
+.searchdrop{
+  position:absolute;top:45px;left:0;right:0;
+  background:#242831;border:1px solid #51565e;
+  border-radius:10px;display:none;
+  max-height:290px;overflow:auto;z-index:50;
+}
+.searchdrop button{
+  display:block;width:100%;text-align:left;
+  border:0;background:transparent;color:white;
+  padding:12px;border-bottom:1px solid #444;
+}
+.topactions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.btn{
+  border:1px solid #ff6c78;
+  background:linear-gradient(160deg,#f04458,#ad1027 48%,#700619);
+  color:white;padding:10px 15px;border-radius:11px;
+  font-weight:800;
+  box-shadow:inset 0 2px 2px #ffffff55,0 4px 12px #0008;
+}
+.btn.gold{
+  background:linear-gradient(145deg,#ffe2a2,#ba8433);
+  color:#23180a;border-color:#e6bb6b;
+}
+.btn.dark{
+  background:#262b33;border-color:#505761;color:white;
+}
+.btn.small{padding:7px 10px;font-size:12px}
+.btn:hover{filter:brightness(1.12)}
+.btn:active{transform:translateY(1px)}
+.shell{
+  display:grid;
+  grid-template-columns:220px minmax(0,1fr) 270px;
+  gap:20px;padding:22px 20px;
+}
+.side{position:sticky;top:90px;align-self:start}
+.nav{display:grid;gap:5px}
+.nav button{
+  display:flex;align-items:center;gap:11px;
+  border:1px solid transparent;
+  background:transparent;color:#d5d8dd;
+  text-align:left;padding:13px 12px;
+  border-radius:12px;font-weight:800;width:100%;
+}
+.nav button.active,.nav button:hover{
+  background:linear-gradient(90deg,#80202b,#292029);
+  border-color:#783341;color:white;
+}
+.ico{
+  display:inline-flex;align-items:center;
+  justify-content:center;width:23px;height:23px;
+  flex-shrink:0;
+}
+.ico svg{width:20px;height:20px;stroke-width:2}
+.card{
+  background:linear-gradient(145deg,#1b1e23,#111216);
+  border:1px solid #35373b;
+  border-radius:17px;
+  box-shadow:0 8px 25px #0004;
+  margin-bottom:17px;overflow:hidden;
+}
+.pad{padding:18px}
+.eyebrow{
+  font-size:11px;letter-spacing:2px;
+  color:var(--gold);font-weight:900;
+  text-transform:uppercase;
+}
+.heading{
+  font-size:26px;margin:6px 0 13px;
+  font-weight:1000;letter-spacing:-.6px;
+}
+.muted{color:var(--muted)}
+.tiny{font-size:12px}
+.sectionhead{
+  display:flex;justify-content:space-between;
+  align-items:center;gap:10px;margin:0 0 14px;
+}
+.sectionhead h2{font-size:19px;margin:0}
+.tiles{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+.tile{
+  border:1px solid #69402c;
+  background:linear-gradient(150deg,#24262b,#121316);
+  border-radius:13px;padding:17px;
+  text-align:left;color:white;min-height:115px;
+  box-shadow:inset 0 1px #ffffff12,0 5px 12px #0005;
+}
+.tile:hover{border-color:var(--gold)}
+.tile strong{display:block;margin:10px 0 5px}
+.tile .ico{color:var(--gold)}
+.tile small{color:#aab0ba}
+.dtz-hero{
+  min-height:390px;border:1px solid #68452b;
+  border-radius:18px;overflow:hidden;
+  display:flex;align-items:center;
+  background:
+    linear-gradient(90deg,#090a0cf2 0%,#090a0cbb 48%,#090a0c40 100%),
+    url('images/IMG_7764.JPG') center 46%/cover,
+    linear-gradient(135deg,#381017,#101114);
+  margin-bottom:17px;
+}
+.hero-shade{padding:clamp(22px,5vw,56px);max-width:700px}
+.dtz-hero h1{
+  font-size:clamp(38px,6vw,70px);
+  line-height:1.04;letter-spacing:-2px;
+  margin:12px 0;
+}
+.dtz-hero h1 span{color:#f3c56d}
+.dtz-hero p{
+  color:#e0dce0;font-size:17px;line-height:1.5;
+}
+.dtz-presenting{
+  display:flex;align-items:center;flex-wrap:wrap;
+  gap:12px;
+  background:linear-gradient(115deg,#151619,#30171c,#151619);
+  border:1px solid #805b36;
+  border-radius:14px;padding:15px;margin:17px 0;
+}
+.dtz-presenting>span{
+  font-size:11px;color:#e5b966;
+  letter-spacing:1.6px;font-weight:900;
+}
+.dtz-logo-slot{
+  min-width:130px;flex:1;
+  border:1px dashed #78654d;
+  padding:16px;text-align:center;
+  font-size:11px;color:#d6c3a1;
+  letter-spacing:1px;border-radius:8px;
+}
+.dtz-photo-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.dtz-photo{
+  min-height:185px;background-color:#282125;
+  background-position:center;background-size:cover;
+  border:1px solid #74583e;border-radius:12px;
+  display:flex;flex-direction:column;
+  justify-content:flex-end;padding:15px;
+}
+.dtz-photo strong{font-size:20px}
+.dtz-photo small{color:#eee;line-height:1.5}
+.sponsor{
+  background:linear-gradient(110deg,#29231a,#12161b 52%,#27202b);
+  border:1px solid #6b5539;
+  padding:13px 17px;display:flex;
+  justify-content:space-between;
+  align-items:center;gap:12px;
+  border-radius:13px;margin-bottom:16px;
+}
+.sponsor strong{color:#f6d28e}
+.tabs{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}
+.tab{
+  background:#252a32;border:1px solid #424953;
+  color:#e5e6e8;border-radius:10px;
+  padding:10px 15px;font-weight:800;
+}
+.tab.active{background:#9c182b;border-color:#ed5060}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.stat{
+  background:#222731;border:1px solid #3c424c;
+  border-radius:12px;padding:15px;
+}
+.stat b{font-size:23px;display:block;color:var(--gold)}
+.stat small{color:#afb5bf}
+.listrow{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 0;border-bottom:1px solid #333942;
+}
+.listrow:last-child{border:0}
+.grow{flex:1;min-width:0}
+.profilehero{
+  padding:24px;
+  background:linear-gradient(110deg,#561521,#242026 58%,#1b1e26);
+  border-bottom:1px solid #6c3b3c;
+}
+.profilebar{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.profilebar h1{margin:0 0 6px;font-size:28px}
+.profilebody{padding:20px}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.info{
+  background:#20252c;border:1px solid #343c45;
+  padding:16px;border-radius:12px;
+}
+.info h3{margin:0 0 10px;font-size:16px;color:var(--gold)}
+.info p{margin:7px 0;line-height:1.5}
+.field{
+  width:100%;background:#0d1116;
+  border:1px solid #4b535e;color:white;
+  border-radius:9px;padding:11px;
+}
+.auth-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+}
+.auth-grid label{
+  display:block;font-size:12px;
+  color:#e5bc76;margin-bottom:5px;
+}
+.auth-grid input,.auth-grid select,.auth-grid textarea{
+  width:100%;background:#171a20;color:white;
+  border:1px solid #555963;
+  border-radius:9px;padding:12px;
+}
+.auth-grid .wide{grid-column:1/-1}
+.auth-tabs{display:flex;gap:9px;margin-bottom:16px}
+.auth-tabs button{flex:1}
+.auth-note{font-size:12px;color:#aeb4bd;line-height:1.5}
+.auth-error{color:#ff8890}
+.auth-success{color:#b8edbd}
+.modalbg{
+  position:fixed;inset:0;background:#000b;
+  z-index:80;display:flex;align-items:center;
+  justify-content:center;padding:15px;
+}
+.modal{
+  width:min(520px,100%);max-height:90vh;
+  overflow:auto;background:#20252c;
+  border:1px solid #7e4b4f;
+  border-radius:18px;padding:22px;
+}
+.modalhead{
+  display:flex;align-items:center;
+  justify-content:space-between;
+}
+.close{background:transparent;color:white;border:0;font-size:25px}
+.notice{
+  background:#33251b;border:1px solid #8a673c;
+  padding:13px;border-radius:11px;
+  color:#f4d39c;margin-bottom:14px;
+}
+.tag{
+  font-size:11px;color:#f8d49d;
+  border:1px solid #8c633c;border-radius:30px;
+  padding:4px 9px;white-space:nowrap;
+}
+.mobilebar{display:none}
+.hide{display:none!important}
+@media(max-width:1100px){
+  .shell{grid-template-columns:190px minmax(0,1fr)}
+  .right{display:none}
+}
+@media(max-width:720px){
+  .topin{padding:11px 13px;gap:8px}
+  .logo{font-size:24px}
+  .logo small{font-size:7px;letter-spacing:1.8px}
+  .search{display:none}
+  .shell{display:block;padding:14px 12px 90px}
+  .side{display:none}
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .twocol,.auth-grid,.dtz-photo-grid{grid-template-columns:1fr}
+  .dtz-hero{min-height:310px}
+  .dtz-photo{min-height:155px}
+  .auth-grid .wide{grid-column:auto}
+  .mobilebar{
+    display:flex;position:fixed;
+    bottom:0;left:0;right:0;
+    background:#101217f5;
+    border-top:1px solid #5b2b36;
+    z-index:35;justify-content:space-around;
+    padding:7px 3px max(7px,env(safe-area-inset-bottom));
+  }
+  .mobilebar button{
+    background:transparent;border:0;
+    color:#bfc3ca;display:flex;
+    flex-direction:column;align-items:center;
+    gap:4px;font-size:10px;font-weight:800;padding:5px;
+  }
+  .mobilebar button.active{color:#ff6575}
+  .pad{padding:15px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap topin">
+    <div class="logo" onclick="go('home')" style="cursor:pointer">
+      DIRT TRACKER<span>Z</span>
+      <small>THE DIRT RACING COMMUNITY</small>
+    </div>
+
+    <div class="search">
+      <input
+        id="search"
+        placeholder="Search tracks, drivers, events, media..."
+        oninput="searchNow(this.value)"
+      >
+      <div id="searchdrop" class="searchdrop"></div>
+    </div>
+
+    <div class="topactions">
+      <button class="btn dark" onclick="go('inbox')">
+        Inbox
+      </button>
+      <button
+        class="btn gold"
+        id="accountButton"
+        onclick="openModal('account')"
+      >
+        Sign In / Join
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap shell">
+
+  <aside class="side">
+    <nav class="nav" id="nav"></nav>
+
+    <div class="card pad" style="margin-top:18px">
+      <div class="eyebrow">DIRT TRACKERZ</div>
+      <h3>Racing Community</h3>
+      <p class="tiny muted">
+        Follow drivers, tracks, creators, series,
+        announcers, and streaming partners.
+      </p>
+      <button
+        class="btn gold small"
+        onclick="go('profiles')"
+      >
+        Explore Community
+      </button>
+    </div>
+
+    <div class="card pad">
+      <div class="eyebrow">MARKETING PARTNERS</div>
+      <p class="tiny muted">
+        Supporting the people and businesses
+        that keep dirt track racing alive.
+      </p>
+      <div id="sidebarSponsors"></div>
+      <button
+        class="btn dark small"
+        onclick="go('partners')"
+      >
+        View Partners
+      </button>
+    </div>
+  </aside>
+
+  <main id="main"></main>
+
+  <aside class="right">
+
+    <div class="card pad">
+      <div class="eyebrow">RACING TONIGHT</div>
+      <h3>Tonight's Action</h3>
+      <div id="rightEvents"></div>
+      <button
+        class="btn dark small"
+        onclick="go('tonight')"
+      >
+        View Racing Tonight
+      </button>
+    </div>
+
+    <div class="card pad">
+      <div class="eyebrow">PARTNER SPOTLIGHT</div>
+      <div id="partnerSpotlight">
+        <div class="dtz-logo-slot">
+          FEATURED SPONSOR LOGO
+        </div>
+      </div>
+      <p class="tiny muted">
+        Featured marketing partner placement.
+      </p>
+      <button
+        class="btn gold small"
+        onclick="go('partners')"
+      >
+        Our Partners
+      </button>
+    </div>
+
+    <div class="card pad">
+      <div class="eyebrow">QUICK ACCESS</div>
+      <nav class="nav">
+        <button onclick="go('profiles')">
+          Community Profiles
+        </button>
+        <button onclick="go('events')">
+          Events & Results
+        </button>
+        <button onclick="go('inbox')">
+          Messages
+        </button>
+        <button onclick="go('admin')">
+          Owner Command Center
+        </button>
+      </nav>
+    </div>
+
+  </aside>
+
+</div>
+
+<nav class="mobilebar" id="mobileNav"></nav>
+
+<footer style="
+  padding:35px 20px 100px;
+  text-align:center;
+  color:#a7adb6;
+  border-top:1px solid #35373b;
+">
+  <strong style="color:#dfb45c">
+    DIRT TRACKERZ
+  </strong>
+  <p class="tiny">
+    THE DIRT RACING COMMUNITY
+  </p>
+  <p class="tiny">
+    Built for the people who live for dirt track racing.
+  </p>
+</footer>
+
+<div id="modalroot"></div>
+<div id="toastroot"></div>
+
+<script>
+"use strict";
+
+/* DIRT TRACKERZ — WEBSITE FUNCTIONS */
+
+const DTZ_ICONS = {
+  home:'house',
+  feed:'newspaper',
+  tonight:'calendar-days',
+  events:'flag-triangle-right',
+  profiles:'users',
+  inbox:'mail',
+  partners:'handshake',
+  admin:'settings',
+  driver:'trophy',
+  fan:'user-round',
+  track:'flag',
+  series:'calendar',
+  media:'camera',
+  stream:'video',
+  supplier:'wrench',
+  podcast:'mic',
+  announcer:'radio'
+};
+
+const DTZ_NAV = [
+  ['home','Home','home'],
+  ['feed','Social Feed','feed'],
+  ['tonight','Racing Tonight','tonight'],
+  ['events','Events & Results','events'],
+  ['profiles','Community','profiles'],
+  ['inbox','Messages','inbox'],
+  ['partners','Partners','partners'],
+  ['admin','Owner Dashboard','admin']
+];
+
+const DTZ_TYPES = [
+  ['driver','Drivers','Driver profiles, race stats, sponsors and schedules'],
+  ['fan','Fans','Follow racing, favorite drivers and Pit Pals'],
+  ['track','Tracks & Promoters','Events, results, rainouts and broadcasts'],
+  ['series','Racing Series','Schedules, standings and announcements'],
+  ['media','Media Creators','Photography, videography and racing write-ups'],
+  ['stream','Streaming Partners','Broadcast schedules and official watch links'],
+  ['supplier','Suppliers','Racing manufacturers, products and services'],
+  ['podcast','Podcasters','Episodes, shows and racing discussions'],
+  ['announcer','Announcers','Event schedules, highlights and bookings']
+];
+
+const DTZ_SPONSORS = [
+  {
+    name:'Presenting Partner',
+    logo:'',
+    url:'',
+    placement:'presenting'
+  },
+  {
+    name:'Marketing Partner 1',
+    logo:'',
+    url:'',
+    placement:'homepage'
+  },
+  {
+    name:'Marketing Partner 2',
+    logo:'',
+    url:'',
+    placement:'homepage'
+  }
+];
+
+let dtzPage = 'home';
+let dtzSelectedType = 'driver';
+
+function dtzIcon(name){
+  const paths = {
+    house:'<path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/>',
+    newspaper:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h5v5H7zM15 8h3M15 12h3M7 16h11"/>',
+    'calendar-days':'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/>',
+    'flag-triangle-right':'<path d="M4 21V4l16 7-16 7"/>',
+    users:'<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4 5"/>',
+    mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 7 9-7"/>',
+    handshake:'<path d="m2 9 5-5 5 3 5-3 5 5-7 9-3-2-3 2z"/>',
+    settings:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+    trophy:'<path d="M7 3h10v8a5 5 0 0 1-10 0zM7 5H3v3a4 4 0 0 0 4 4M17 5h4v3a4 4 0 0 1-4 4M12 16v4M8 21h8"/>',
+    'user-round':'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    flag:'<path d="M5 22V3M5 4c6-4 8 4 15 0v11c-7 4-9-4-15 0"/>',
+    calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/>',
+    camera:'<path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="4"/>',
+    video:'<rect x="2" y="5" width="15" height="14" rx="2"/><path d="m17 10 5-3v10l-5-3"/>',
+    wrench:'<path d="M21 7a6 6 0 0 1-8 6L6 20a3 3 0 0 1-4-4l7-7a6 6 0 0 1 8-8l-4 4 3 3z"/>',
+    mic:'<rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/>',
+    radio:'<rect x="3" y="8" width="18" height="13" rx="2"/><path d="m6 8 12-6M7 13h7M7 17h5"/><circle cx="17" cy="16" r="2"/>'
+  };
+  return '<span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
+    (paths[name] || paths.house)+'</svg></span>';
+}
+
+function dtzEscape(value){
+  return String(value ?? '').replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+function dtzSponsorHTML(placement){
+  const items = DTZ_SPONSORS.filter(s=>s.placement===placement);
+  return items.map(s=>{
+    const content=s.logo
+      ? '<img src="'+dtzEscape(s.logo)+'" alt="'+dtzEscape(s.name)+'" style="max-width:180px;max-height:65px;object-fit:contain">'
+      : '<div class="dtz-logo-slot">'+dtzEscape(s.name)+'<br><small>LOGO PLACEMENT</small></div>';
+    return s.url
+      ? '<a href="'+dtzEscape(s.url)+'" target="_blank" rel="noopener noreferrer sponsored">'+content+'</a>'
+      : content;
+  }).join('');
+}
+
+function dtzHome(){
+  return `
+  <section class="dtz-hero">
+    <div class="hero-shade">
+      <div class="eyebrow">WELCOME TO DIRT TRACKERZ</div>
+      <h1>THE HOME OF <span>DIRT TRACK RACING</span></h1>
+      <p>One community. Every track. Every driver. Every fan.</p>
+      <button class="btn gold" onclick="go('profiles')">
+        EXPLORE DIRT TRACKERZ
+      </button>
+      <button class="btn" onclick="go('tonight')">
+        RACING TONIGHT
+      </button>
+    </div>
+  </section>
+
+  <div class="dtz-presenting">
+    <span>POWERED BY</span>
+    ${dtzSponsorHTML('presenting')}
+  </div>
+
+  <section class="card pad">
+    <div class="sectionhead">
+      <h2>WHAT'S HOT</h2>
+      <span class="tag">COMMUNITY HIGHLIGHTS</span>
+    </div>
+    <div class="dtz-photo-grid">
+      <div class="dtz-photo">
+        <strong>Trending Photos</strong>
+        <small>Featured racing photography</small>
+      </div>
+      <div class="dtz-photo">
+        <strong>Trending Drivers</strong>
+        <small>Follow the racing community</small>
+      </div>
+      <div class="dtz-photo">
+        <strong>Trending Events</strong>
+        <small>See what's happening at the track</small>
+      </div>
+    </div>
+    <p class="tiny muted">
+      Live trending rankings will appear when community activity tracking is connected.
+    </p>
+  </section>
+
+  <div class="sponsor">
+    <div>
+      <div class="eyebrow">MARKETING PARTNERS</div>
+      <strong>SUPPORTING DIRT TRACK RACING</strong>
+    </div>
+    ${dtzSponsorHTML('homepage')}
+  </div>
+
+  <section class="card pad">
+    <div class="sectionhead">
+      <h2>TOP STORIES</h2>
+      <button class="btn dark small" onclick="go('feed')">
+        View Community Feed
+      </button>
+    </div>
+    <p class="muted">
+      Racing news, event write-ups, victory lane highlights,
+      and announcements from verified community profiles
+      will appear here.
+    </p>
+    <button class="btn gold small" onclick="go('feed')">
+      Explore Stories
+    </button>
+  </section>
+
+  <section class="card pad">
+    <div class="sectionhead">
+      <h2>EXPLORE DIRT TRACKERZ</h2>
+      <span class="tag">RACING COMMUNITY</span>
+    </div>
+    <div class="tiles">
+      ${DTZ_TYPES.map(t=>`
+        <button class="tile" onclick="dtzShowType('${t[0]}')">
+          ${dtzIcon(DTZ_ICONS[t[0]])}
+          <strong>${t[1]}</strong>
+          <small>${t[2]}</small>
+        </button>
+      `).join('')}
+    </div>
+  </section>
+
+  <section class="card pad">
+    <div class="sectionhead">
+      <h2>RACING TONIGHT</h2>
+      <button class="btn gold small" onclick="go('tonight')">
+        View All
+      </button>
+    </div>
+    <p class="muted">
+      Find tonight's racing, track information,
+      event details, announcers, rainout notices,
+      and official streaming links.
+    </p>
+    <button class="btn dark" onclick="go('tonight')">
+      See Tonight's Events
+    </button>
+  </section>
+  `;
+}
+
+function dtzRenderNavigation(){
+  const nav=document.getElementById('nav');
+  const mobile=document.getElementById('mobileNav');
+
+  nav.innerHTML=DTZ_NAV.map(n=>`
+    <button class="${dtzPage===n[0]?'active':''}"
+      onclick="go('${n[0]}')">
+      ${dtzIcon(DTZ_ICONS[n[2]])}
+      ${n[1]}
+    </button>
+  `).join('');
+
+  mobile.innerHTML=[
+    ['home','Home'],['feed','Feed'],
+    ['tonight','Tonight'],['profiles','Community'],
+    ['inbox','Inbox']
+  ].map(n=>`
+    <button class="${dtzPage===n[0]?'active':''}"
+      onclick="go('${n[0]}')">
+      ${dtzIcon(DTZ_ICONS[n[0]])}
+      ${n[1]}
+    </button>
+  `).join('');
+
+  document.getElementById('sidebarSponsors').innerHTML=
+    dtzSponsorHTML('homepage');
+
+  document.getElementById('partnerSpotlight').innerHTML=
+    dtzSponsorHTML('homepage');
+
+  document.getElementById('rightEvents').innerHTML=
+    '<p class="tiny muted">Live schedules will appear when track events are connected.</p>';
+}
+
+/* PART 4 — COMMUNITY PROFILES */
+
+const DTZ_PROFILE_DETAILS = {
+  driver:{
+    title:'Driver Profile',
+    subtitle:'The racer, the car, the team, and the results.',
+    sections:[
+      ['Driver Information','Profile photo, car number, hometown, racing class, team, biography and sponsors.'],
+      ['What’s on the Car?','Chassis, shocks and engine information.'],
+      ['Race Results','Feature wins, finishes, season statistics and event history.'],
+      ['Partnership Opportunities','Optional sponsorship inquiries and direct contact.'],
+      ['Photos','Purchased racing photos will be available when the photo marketplace launches.']
+    ]
+  },
+  fan:{
+    title:'Fan Profile',
+    subtitle:'Your home in the dirt racing community.',
+    sections:[
+      ['My Following','Follow drivers, tracks, media creators, announcers, series and streaming partners.'],
+      ['Pit Pals','Connect with other racing fans and discover their favorite racing content.'],
+      ['Saved Events','Follow upcoming races and receive event updates.'],
+      ['Fan Rewards','Participation rewards and community recognition.']
+    ]
+  },
+  track:{
+    title:'Track & Promoter Profile',
+    subtitle:'Everything fans and racers need to know about the track.',
+    sections:[
+      ['Track Overview','Track photographs, location, contact information, facilities and racing classes.'],
+      ['Upcoming Events','Schedules, admission details, race information and event links.'],
+      ['Race Results','Official results, feature winners and historical race information.'],
+      ['Rainout Management','Authorized track representatives can publish rainout announcements.'],
+      ['Streaming Partners','Approve official broadcast connections and display Watch Live links.'],
+      ['Reviews / Write-Ups','Race reports, announcements and featured photography.']
+    ]
+  },
+  series:{
+    title:'Racing Series Profile',
+    subtitle:'Schedules, results and championship information.',
+    sections:[
+      ['Series Overview','Series description, classes, officials and sponsors.'],
+      ['Upcoming Events','Race schedules and participating tracks.'],
+      ['Championship Standings','Driver points, results and season rankings.'],
+      ['Announcements','Official updates, race news and write-ups.'],
+      ['Driver Registration','Event registration and participant information.']
+    ]
+  },
+  media:{
+    title:'Media Creator Profile',
+    subtitle:'Photography, videography and racing coverage.',
+    sections:[
+      ['Posts','Racing photography, event write-ups and community updates.'],
+      ['Portfolio','Up to 10 featured photographs for approved photographers at launch.'],
+      ['Videos','Links and embeds from supported external video platforms.'],
+      ['About','Creator biography, coverage areas and specialties.'],
+      ['Contact / Bookings','Inquiries and direct communication.'],
+      ['External Galleries','Links to the creator’s existing website or photo galleries.'],
+      ['Photo Sales','Coming Soon — direct photo purchases are not active at launch.']
+    ]
+  },
+  stream:{
+    title:'Streaming Partner Profile',
+    subtitle:'Official live racing coverage and broadcast schedules.',
+    sections:[
+      ['Streaming Schedule','Upcoming broadcasts and event details.'],
+      ['Connected Tracks','Tracks that have approved the streaming partnership.'],
+      ['Watch Live','Official links to the streaming partner’s broadcast platform.'],
+      ['Rainout Updates','Broadcast changes connected to track rainout notices.'],
+      ['Media Highlights','Links to previously published coverage.'],
+      ['Contact','Streaming inquiries and event partnerships.']
+    ]
+  },
+  supplier:{
+    title:'Supplier / Manufacturer Profile',
+    subtitle:'The businesses that support dirt track racing.',
+    sections:[
+      ['Business Overview','Company logo, description, products and contact information.'],
+      ['Products & Services','Racing parts, equipment, merchandise and related services.'],
+      ['Official Website','Outbound links to the supplier’s own store or website.'],
+      ['Marketing Partnerships','Optional advertising and sponsorship opportunities.'],
+      ['Contact','Business inquiries and community communication.']
+    ]
+  },
+  podcast:{
+    title:'Podcaster Profile',
+    subtitle:'Racing conversations, interviews and episodes.',
+    sections:[
+      ['About the Show','Podcast logo, banner, hosts and show description.'],
+      ['Latest Episodes','Newest episodes first, with official listening links.'],
+      ['Upcoming Shows','Scheduled broadcasts and upcoming guests.'],
+      ['Connected Racing Community','Related drivers, tracks, series and events.'],
+      ['Contact','Guest appearances, interviews and partnerships.']
+    ]
+  },
+  announcer:{
+    title:'Announcer Profile',
+    subtitle:'The voices of dirt track racing.',
+    sections:[
+      ['About the Announcer','Biography, experience and announcing specialties.'],
+      ['Booking Availability','Upcoming availability and event booking inquiries.'],
+      ['Event Schedule','Confirmed events and connected racetracks.'],
+      ['Media Highlights','Externally hosted announcing clips and broadcasts.'],
+      ['Streaming Connections','Linked streaming partners and broadcast appearances.'],
+      ['Contact / Messages','Direct communication with promoters and event organizers.']
+    ]
+  }
+};
+
+function dtzShowType(type){
+  if(!DTZ_PROFILE_DETAILS[type]) return;
+  dtzSelectedType=type;
+  go('profile-detail');
+}
+
+function dtzProfilesPage(){
+  return `
+    <div class="eyebrow">THE DIRT RACING COMMUNITY</div>
+    <h1 class="heading">COMMUNITY PROFILES</h1>
+
+    <div class="notice">
+      Browse all profile categories. Member-created profiles
+      will appear here as we connect the live community database.
+    </div>
+
+    <div class="card pad">
+      <div class="sectionhead">
+        <h2>Find Your Racing Community</h2>
+        <span class="tag">9 PROFILE CATEGORIES</span>
+      </div>
+
+      <div class="tiles">
+        ${DTZ_TYPES.map(type=>`
+          <button class="tile"
+            onclick="dtzShowType('${type[0]}')">
+            ${dtzIcon(DTZ_ICONS[type[0]])}
+            <strong>${dtzEscape(type[1])}</strong>
+            <small>${dtzEscape(type[2])}</small>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function dtzProfileDetail(){
+  const type=dtzSelectedType;
+  const data=DTZ_PROFILE_DETAILS[type];
+
+  if(!data) return dtzProfilesPage();
+
+  return `
+    <button class="btn dark small"
+      onclick="go('profiles')"
+      style="margin-bottom:14px">
+      Back to Community
+    </button>
+
+    <div class="card">
+      <div class="profilehero">
+        <div class="eyebrow">
+          DIRT TRACKERZ COMMUNITY
+        </div>
+
+        <div class="profilebar" style="margin-top:14px">
+          ${dtzIcon(DTZ_ICONS[type])}
+
+          <div class="grow">
+            <h1>${dtzEscape(data.title)}</h1>
+            <p class="muted">
+              ${dtzEscape(data.subtitle)}
+            </p>
+          </div>
+        </div>
+
+        <div class="tabs" style="margin-top:18px">
+          <button class="btn gold small"
+            onclick="openModal('account')">
+            Create Your Profile
+          </button>
+
+          <button class="btn dark small"
+            onclick="go('inbox')">
+            Messages
+          </button>
+        </div>
+      </div>
+
+      <div class="profilebody">
+        <div class="eyebrow">PROFILE FEATURES</div>
+
+        <div class="twocol" style="margin-top:15px">
+          ${data.sections.map(section=>`
+            <div class="info">
+              <h3>${dtzEscape(section[0])}</h3>
+              <p class="muted">
+                ${dtzEscape(section[1])}
+              </p>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="card pad">
+      <h2>Community Connections</h2>
+      <p class="muted">
+        Profiles will connect to relevant tracks, events,
+        drivers, streaming partners, creators and other
+        members as live account features are enabled.
+      </p>
+
+      <button class="btn gold small"
+        onclick="go('profiles')">
+        Explore More Profiles
+      </button>
+    </div>
+  `;
+}
+
+/* PART 5 — RACING, COMMUNITY & PARTNERS */
+
+const DTZ_DEMO_EVENTS = [
+  {
+    id:1,
+    track:"Example Speedway",
+    title:"Saturday Night Racing",
+    date:"Sample Event",
+    classes:"Sprint Cars, Modifieds, Stock Cars",
+    status:"Schedule Pending",
+    announcer:"To Be Announced",
+    stream:"Official Broadcast Link Pending"
+  },
+  {
+    id:2,
+    track:"Example Dirt Track",
+    title:"Championship Weekend",
+    date:"Sample Event",
+    classes:"Late Models, Street Stocks",
+    status:"Schedule Pending",
+    announcer:"To Be Announced",
+    stream:"Official Broadcast Link Pending"
+  }
+];
+
+function dtzEventCard(event){
+  return `
+    <div class="card pad">
+      <div class="eyebrow">${dtzEscape(event.track)}</div>
+      <h2>${dtzEscape(event.title)}</h2>
+      <p class="muted">${dtzEscape(event.date)}</p>
+      <p>${dtzEscape(event.classes)}</p>
+      <span class="tag">${dtzEscape(event.status)}</span>
+      <div class="tabs" style="margin-top:15px">
+        <button class="btn gold small"
+          onclick="dtzShowEvent(${event.id})">
+          Event Details
+        </button>
+        <button class="btn dark small"
+          onclick="dtzShowType('track')">
+          Track Profile
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+let dtzSelectedEvent=1;
+
+function dtzShowEvent(id){
+  dtzSelectedEvent=id;
+  go('event-detail');
+}
+
+function dtzEventsPage(){
+  return `
+    <div class="eyebrow">RACING SCHEDULE</div>
+    <h1 class="heading">EVENTS & RESULTS</h1>
+
+    <div class="notice">
+      These are sample event cards. Official schedules,
+      race results and rainout information will be
+      connected to verified tracks.
+    </div>
+
+    <div class="tabs">
+      <button class="tab active">Arkansas</button>
+      <button class="tab">Texas</button>
+      <button class="tab">Louisiana</button>
+    </div>
+
+    ${DTZ_DEMO_EVENTS.map(dtzEventCard).join('')}
+
+    <div class="card pad">
+      <h2>Official Race Results</h2>
+      <p class="muted">
+        Feature winners, heat race results, driver profiles
+        and championship standings will appear here
+        after verified results are connected.
+      </p>
+    </div>
+  `;
+}
+
+function dtzEventDetail(){
+  const event=DTZ_DEMO_EVENTS.find(
+    item=>item.id===dtzSelectedEvent
+  );
+
+  if(!event) return dtzEventsPage();
+
+  return `
+    <button class="btn dark small"
+      onclick="go('events')">
+      Back to Events
+    </button>
+
+    <div class="card pad" style="margin-top:15px">
+      <div class="eyebrow">EVENT DETAILS</div>
+      <h1>${dtzEscape(event.title)}</h1>
+
+      <div class="twocol">
+        <div class="info">
+          <h3>Track</h3>
+          <p>${dtzEscape(event.track)}</p>
+          <button class="btn dark small"
+            onclick="dtzShowType('track')">
+            View Track Profile
+          </button>
+        </div>
+
+        <div class="info">
+          <h3>Event Status</h3>
+          <p>${dtzEscape(event.status)}</p>
+        </div>
+
+        <div class="info">
+          <h3>Racing Classes</h3>
+          <p>${dtzEscape(event.classes)}</p>
+        </div>
+
+        <div class="info">
+          <h3>Event Announcer</h3>
+          <p>${dtzEscape(event.announcer)}</p>
+          <button class="btn dark small"
+            onclick="dtzShowType('announcer')">
+            Announcer Profile
+          </button>
+        </div>
+
+        <div class="info">
+          <h3>Watch Live</h3>
+          <p>${dtzEscape(event.stream)}</p>
+          <button class="btn gold small"
+            onclick="dtzShowType('stream')">
+            Streaming Partners
+          </button>
+        </div>
+
+        <div class="info">
+          <h3>Race Results</h3>
+          <p>Awaiting verified official results.</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function dtzTonightPage(){
+  return `
+    <div class="eyebrow">TODAY'S RACING</div>
+    <h1 class="heading">RACING TONIGHT</h1>
+
+    <div class="notice">
+      Only events scheduled for the current day will
+      appear here when live schedules are connected.
+      The examples below are not confirmed races.
+    </div>
+
+    ${DTZ_DEMO_EVENTS.map(dtzEventCard).join('')}
+  `;
+}
+
+function dtzFeedPage(){
+  return `
+    <div class="eyebrow">DIRT TRACKERZ COMMUNITY</div>
+    <h1 class="heading">SOCIAL FEED</h1>
+
+    <div class="card pad">
+      <div class="tabs">
+        <button class="tab active">Following</button>
+        <button class="tab">What's in the News</button>
+      </div>
+
+      <div class="notice">
+        Live community posts will appear here after
+        posting, following and moderation are connected.
+      </div>
+
+      <h2>Community Updates</h2>
+      <p class="muted">
+        Drivers, tracks, media creators, racing series,
+        announcers and streaming partners will be able
+        to share racing updates and write-ups.
+      </p>
+    </div>
+
+    <div class="card pad">
+      <h2>Fan Reactions</h2>
+      <p class="muted">
+        Checkered Flag and Black Flag reactions,
+        along with approved racing comments,
+        will be available when community interaction
+        features are activated.
+      </p>
+    </div>
+  `;
+}
+
+function dtzInboxPage(){
+  return `
+    <div class="eyebrow">COMMUNITY COMMUNICATION</div>
+    <h1 class="heading">MESSAGES</h1>
+
+    <div class="notice">
+      Private messaging is not active yet.
+      Messages will only be delivered when the
+      secure messaging database is connected.
+    </div>
+
+    <div class="card pad">
+      <h2>Your Inbox</h2>
+      <p class="muted">
+        Communicate with drivers, tracks, media creators,
+        streaming partners, announcers and other members.
+      </p>
+
+      <div class="info">
+        <h3>In-App Notifications</h3>
+        <p>
+          New messages, followed profile updates,
+          event announcements and rainout notices
+          will appear here.
+        </p>
+      </div>
+    </div>
+  `;
+}
+
+function dtzPartnersPage(){
+  return `
+    <div class="eyebrow">DIRT TRACKERZ BUSINESS NETWORK</div>
+    <h1 class="heading">MARKETING PARTNERS</h1>
+
+    <div class="dtz-presenting">
+      <span>PRESENTING PARTNER</span>
+      ${dtzSponsorHTML('presenting')}
+    </div>
+
+    <div class="card pad">
+      <h2>Our Marketing Partners</h2>
+      <div class="dtz-presenting">
+        ${dtzSponsorHTML('homepage')}
+      </div>
+
+      <p class="muted">
+        Dirt Trackerz connects racing fans, drivers,
+        tracks and creators with businesses that
+        support the sport.
+      </p>
+    </div>
+
+    <div class="card pad">
+      <h2>Become a Marketing Partner</h2>
+
+      <div class="twocol">
+        <div class="info">
+          <h3>Local Business Partnerships</h3>
+          <p>
+            Affordable opportunities for local businesses
+            to reach the dirt racing community.
+          </p>
+        </div>
+
+        <div class="info">
+          <h3>National Manufacturers</h3>
+          <p>
+            Sponsorship opportunities for racing
+            manufacturers and industry suppliers.
+          </p>
+        </div>
+      </div>
+
+      <p class="tiny muted">
+        Advertising purchases and sponsor management
+        are not active yet.
+      </p>
+    </div>
+  `;
+}
+
+function dtzAdminPage(){
+  return `
+    <div class="eyebrow">DIRT TRACKERZ MANAGEMENT</div>
+    <h1 class="heading">OWNER COMMAND CENTER</h1>
+
+    <div class="notice">
+      Administrative features are a preview only.
+      Live owner access will require secure
+      authorization before launch.
+    </div>
+
+    <div class="card pad">
+      <h2>Platform Management</h2>
+
+      <div class="twocol">
+        <div class="info">
+          <h3>Community Accounts</h3>
+          <p>Profile approvals, verification and moderation.</p>
+        </div>
+
+        <div class="info">
+          <h3>Homepage Management</h3>
+          <p>Featured photos, headlines and layout controls.</p>
+        </div>
+
+        <div class="info">
+          <h3>Marketing Partners</h3>
+          <p>Upload sponsor logos, assign placements and track clicks.</p>
+        </div>
+
+        <div class="info">
+          <h3>Race Results</h3>
+          <p>Review results, winner photos and disputed information.</p>
+        </div>
+
+        <div class="info">
+          <h3>Platform Intelligence</h3>
+          <p>Engagement, trends, referrals and sponsor analytics.</p>
+        </div>
+
+        <div class="info">
+          <h3>Media Management</h3>
+          <p>Creator approvals, portfolios and featured photography.</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* PART 6 — NAVIGATION AND ACCOUNT INTERFACE */
+
+let dtzCurrentUser = null;
+let dtzAuthReady = false;
+
+function go(page) {
+  const pages = {
+    home: dtzHome,
+    profiles: dtzProfilesPage,
+    "profile-detail": dtzProfileDetail,
+    tonight: dtzTonightPage,
+    events: dtzEventsPage,
+    "event-detail": dtzEventDetail,
+    feed: dtzFeedPage,
+    inbox: dtzInboxPage,
+    partners: dtzPartnersPage,
+    admin: dtzAdminPage
+  };
+
+  dtzPage = pages[page] ? page : "home";
+
+  const main = document.getElementById("main");
+  if (main) {
+    main.innerHTML = pages[dtzPage]();
+  }
+
+  dtzRenderNavigation();
+  window.scrollTo(0, 0);
+}
+
+function searchNow(query) {
+  const term = String(query || "").trim();
+
+  if (!term) {
+    go("profiles");
+    return;
+  }
+
+  go("profiles");
+
+  const main = document.getElementById("main");
+  if (!main) return;
+
+  const notice = document.createElement("div");
+  notice.className = "notice";
+  notice.textContent =
+    'Search for "' + term +
+    '" will be available when the live directory is connected.';
+
+  main.prepend(notice);
+}
+
+function dtzNotify(message) {
+  const root = document.getElementById("toastroot");
+
+  if (!root) {
+    alert(message);
+    return;
+  }
+
+  root.innerHTML = "";
+
+  const notice = document.createElement("div");
+  notice.className = "notice";
+  notice.textContent = message;
+
+  root.appendChild(notice);
+
+  setTimeout(() => {
+    if (root.contains(notice)) notice.remove();
+  }, 5000);
+}
+
+function closeModal() {
+  const root = document.getElementById("modalroot");
+  if (root) root.innerHTML = "";
+}
+
+function openModal(type) {
+  if (type !== "account") return;
+
+  const root = document.getElementById("modalroot");
+  if (!root) return;
+
+  root.innerHTML = `
+    <div class="modalbg" id="dtzModalBackground">
+      <div class="card pad"
+        style="width:min(95%,540px);max-height:90vh;overflow:auto">
+
+        <div class="sectionhead">
+          <h2>DIRT TRACKERZ ACCOUNT</h2>
+          <button class="btn dark small"
+            onclick="closeModal()">
+            Close
+          </button>
+        </div>
+
+        <div class="tabs">
+          <button class="btn gold small"
+            onclick="dtzAccountView('signin')">
+            Sign In
+          </button>
+
+          <button class="btn dark small"
+            onclick="dtzAccountView('signup')">
+            Create Account
+          </button>
+        </div>
+
+        <div id="dtzAccountContent"></div>
+      </div>
+    </div>
+  `;
+
+  dtzAccountView(dtzCurrentUser ? "account" : "signin");
+}
+
+function dtzAccountView(view) {
+  const area = document.getElementById("dtzAccountContent");
+  if (!area) return;
+
+  if (view === "account" && dtzCurrentUser) {
+    area.innerHTML = `
+      <div class="info">
+        <h3>Signed In</h3>
+        <p>${dtzEscape(dtzCurrentUser.email || "Member")}</p>
+
+        <button class="btn gold small"
+          onclick="dtzSignOut()">
+          Sign Out
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  if (view === "signup") {
+    area.innerHTML = `
+      <form id="dtzSignupForm"
+        onsubmit="dtzSubmitSignup(event)">
+
+        <h3>Create Your Free Account</h3>
+
+        <label>Display Name</label>
+        <input id="dtzSignupName"
+          required maxlength="80"
+          placeholder="Your name">
+
+        <label>Username</label>
+        <input id="dtzSignupUsername"
+          required minlength="3" maxlength="30"
+          pattern="[A-Za-z0-9_]+"
+          placeholder="RacingFan123">
+
+        <label>Account Type</label>
+        <select id="dtzSignupType" required>
+          ${DTZ_TYPES.map(type => `
+            <option value="${dtzEscape(type[0])}">
+              ${dtzEscape(type[1])}
+            </option>
+          `).join("")}
+        </select>
+
+        <label>Email Address</label>
+        <input id="dtzSignupEmail"
+          type="email" required
+          autocomplete="email"
+          placeholder="you@example.com">
+
+        <label>Password</label>
+        <input id="dtzSignupPassword"
+          type="password" required
+          minlength="10"
+          autocomplete="new-password"
+          placeholder="At least 10 characters">
+
+        <p class="tiny muted">
+          Your password must contain at least
+          10 characters. You may need to confirm
+          your email before signing in.
+        </p>
+
+        <button class="btn gold"
+          type="submit">
+          Create Account
+        </button>
+      </form>
+    `;
+    return;
+  }
+
+  area.innerHTML = `
+    <form id="dtzSigninForm"
+      onsubmit="dtzSubmitSignin(event)">
+
+      <h3>Welcome Back</h3>
+
+      <label>Email Address</label>
+      <input id="dtzSigninEmail"
+        type="email" required
+        autocomplete="email"
+        placeholder="you@example.com">
+
+      <label>Password</label>
+      <input id="dtzSigninPassword"
+        type="password" required
+        autocomplete="current-password"
+        placeholder="Your password">
+
+      <button class="btn gold"
+        type="submit">
+        Sign In
+      </button>
+
+      <p class="tiny muted">
+        New to Dirt Trackerz?
+      </p>
+
+      <button class="btn dark small"
+        type="button"
+        onclick="dtzAccountView('signup')">
+        Create a Free Account
+      </button>
+    </form>
+  `;
+}
+
+function dtzSubmitSignup(event) {
+  event.preventDefault();
+
+  if (!window.dtzAuthReady || !window.dtzAuthSignup) {
+    dtzNotify("Account services are still loading.");
+    return;
+  }
+
+  const details = {
+    display_name:
+      document.getElementById("dtzSignupName").value.trim(),
+    username:
+      document.getElementById("dtzSignupUsername").value.trim(),
+    account_type:
+      document.getElementById("dtzSignupType").value,
+    email:
+      document.getElementById("dtzSignupEmail").value.trim(),
+    password:
+      document.getElementById("dtzSignupPassword").value
+  };
+
+  window.dtzAuthSignup(details);
+}
+
+function dtzSubmitSignin(event) {
+  event.preventDefault();
+
+  if (!window.dtzAuthReady || !window.dtzAuthSignin) {
+    dtzNotify("Account services are still loading.");
+    return;
+  }
+
+  window.dtzAuthSignin(
+    document.getElementById("dtzSigninEmail").value.trim(),
+    document.getElementById("dtzSigninPassword").value
+  );
+}
+
+function dtzSignOut() {
+  if (window.dtzAuthSignout) {
+    window.dtzAuthSignout();
+  } else {
+    dtzNotify("Account services are still loading.");
+  }
+}
+
+function dtzUpdateAccountUI(user) {
+  dtzCurrentUser = user || null;
+
+  const accountButtons = document.querySelectorAll(
+    '[onclick="openModal(\'account\')"]'
+  );
+
+  accountButtons.forEach(button => {
+    if (button.textContent.trim() === "Sign In") {
+      button.textContent = user ? "My Account" : "Sign In";
+    }
+  });
+}
+
+/* INITIAL WEBSITE RENDER */
+document.addEventListener("DOMContentLoaded", () => {
+  go("home");
+});
+
+</script>
+
+<script type="module">
+import { createClient } from
+  "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+import {
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+} from "./supabase-config.js";
+
+const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+const siteURL =
+  "https://skiman-code.github.io/Dirt-Trackerz/";
+
+function authMessage(message) {
+  if (typeof window.dtzNotify === "function") {
+    window.dtzNotify(message);
+  } else {
+    alert(message);
+  }
+}
+
+function setAuthUser(user) {
+  if (typeof window.dtzUpdateAccountUI === "function") {
+    window.dtzUpdateAccountUI(user);
+  }
+}
+
+function getErrorMessage(error) {
+  return error?.message || "Something went wrong.";
+}
+
+async function saveProfile(user, details) {
+  if (!user?.id || !details) return;
+
+  const profile = {
+    id: user.id,
+    username: details.username,
+    display_name: details.display_name,
+    account_type: details.account_type
+  };
+
+  const { error } = await supabase
+    .from("profiles")
+    .upsert(profile, { onConflict: "id" });
+
+  if (error) {
+    console.error("Profile save error:", error);
+    authMessage(
+      "Your account was created, but the profile " +
+      "could not be saved: " + getErrorMessage(error)
+    );
+  }
+}
+
+window.dtzAuthSignup = async function(details) {
+  if (
+    !details.email ||
+    !details.password ||
+    !details.display_name ||
+    !details.username
+  ) {
+    authMessage("Please complete every required field.");
+    return;
+  }
+
+  if (details.password.length < 10) {
+    authMessage(
+      "Your password must be at least 10 characters."
+    );
+    return;
+  }
+
+  const { data, error } = await supabase.auth.signUp({
+    email: details.email,
+    password: details.password,
+    options: {
+      emailRedirectTo: siteURL,
+      data: {
+        username: details.username,
+        display_name: details.display_name,
+        account_type: details.account_type
+      }
+    }
+  });
+
+  if (error) {
+    authMessage(getErrorMessage(error));
+    return;
+  }
+
+  if (data.session && data.user) {
+    await saveProfile(data.user, details);
+    setAuthUser(data.user);
+    authMessage("Welcome to Dirt Trackerz!");
+    window.closeModal?.();
+  } else {
+    authMessage(
+      "Check your email for a confirmation link " +
+      "to activate your Dirt Trackerz account."
+    );
+  }
+};
+
+window.dtzAuthSignin = async function(email, password) {
+  const { data, error } =
+    await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+  if (error) {
+    authMessage(getErrorMessage(error));
+    return;
+  }
+
+  setAuthUser(data.user);
+  authMessage("Successfully signed in!");
+  window.closeModal?.();
+};
+
+window.dtzAuthSignout = async function() {
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    authMessage(getErrorMessage(error));
+    return;
+  }
+
+  setAuthUser(null);
+  window.closeModal?.();
+  authMessage("You have signed out.");
+};
+
+async function initializeAuth() {
+  const { data, error } =
+    await supabase.auth.getUser();
+
+  if (error && error.name !== "AuthSessionMissingError") {
+    console.warn("Authentication:", error.message);
+  }
+
+  if (data?.user) {
+    const user = data.user;
+    const details = user.user_metadata || {};
+
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!existingProfile && details.username) {
+      await saveProfile(user, details);
+    }
+
+    setAuthUser(user);
+  } else {
+    setAuthUser(null);
+  }
+
+  supabase.auth.onAuthStateChange(
+    (event, session) => {
+      setAuthUser(session?.user || null);
+    }
+  );
+
+  window.dtzAuthReady = true;
+  }
+
+initializeAuth().catch(error => {
+  console.error("Supabase initialization failed:", error);
+  authMessage("Account services could not be loaded.");
+});
+
+</script>
+
+</body>
+</html>
