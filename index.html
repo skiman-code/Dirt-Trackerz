@@ -1753,5 +1753,84 @@ initializeAuth().catch(error => {
 
 </script>
 
+<style>
+/* DIRT TRACKERZ ACCOUNT WINDOW UPGRADE */
+#modalroot .modalbg > .card {
+  width: min(94vw, 460px) !important;
+  padding: 28px !important;
+  border: 1px solid #b58a42;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #272b32, #111317);
+  box-shadow: 0 24px 70px rgba(0,0,0,.75);
+}
+
+#modalroot form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#modalroot form label {
+  display: block;
+  font-weight: 700;
+  color: #f2d18c;
+  margin-top: 10px;
+}
+
+#modalroot form input,
+#modalroot form select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #646a75;
+  border-radius: 10px;
+  background: #191c22;
+  color: #fff;
+  font-size: 16px;
+}
+
+#modalroot form input:focus,
+#modalroot form select:focus {
+  outline: 2px solid #dfb45c;
+  border-color: #dfb45c;
+}
+
+#modalroot form > button[type="submit"] {
+  width: 100%;
+  margin-top: 18px;
+  padding: 15px;
+  font-size: 17px;
+  font-weight: 900;
+  border-radius: 12px;
+}
+
+#modalroot .sectionhead {
+  align-items: flex-start;
+  gap: 12px;
+}
+
+#modalroot .sectionhead h2 {
+  font-size: clamp(19px, 4vw, 25px);
+}
+
+#modalroot .tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+#modalroot form h3 {
+  margin: 8px 0 12px;
+}
+
+@media(max-width:480px) {
+  #modalroot .modalbg > .card {
+    padding: 20px !important;
+  }
+}
+</style>
+
 </body>
 </html>
