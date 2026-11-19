@@ -147,12 +147,30 @@ a{color:var(--gold)}
 .dtz-hero{
   min-height:390px;border:1px solid #68452b;
   border-radius:18px;overflow:hidden;
-  display:flex;align-items:center;
-  background:
-    linear-gradient(90deg,#090a0cf2 0%,#090a0cbb 48%,#090a0c40 100%),
-    url('images/IMG_7764.JPG') center 46%/cover,
-    linear-gradient(135deg,#381017,#101114);
+  display:flex;align-items:center;position:relative;
+  isolation:isolate;background:#101114;
   margin-bottom:17px;
+}
+.dtz-hero-slides{position:absolute;inset:0;z-index:-2;overflow:hidden}
+.dtz-hero-slide{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  opacity:0;animation:dtzHeroFade 25s infinite;
+}
+.dtz-hero-slide:nth-child(1){animation-delay:0s;opacity:1}
+.dtz-hero-slide:nth-child(2){animation-delay:5s}
+.dtz-hero-slide:nth-child(3){animation-delay:10s}
+.dtz-hero-slide:nth-child(4){animation-delay:15s}
+.dtz-hero-slide:nth-child(5){animation-delay:20s}
+@keyframes dtzHeroFade{
+  0%{opacity:0} 3%{opacity:1} 17%{opacity:1} 20%,100%{opacity:0}
+}
+.dtz-hero::before{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(90deg,#090a0cf0 0%,#090a0cc9 48%,#090a0c55 100%);
+}
+@media(prefers-reduced-motion:reduce){
+  .dtz-hero-slide{animation:none;opacity:0}
+  .dtz-hero-slide:first-child{opacity:1}
 }
 .hero-shade{padding:clamp(22px,5vw,56px);max-width:700px}
 .dtz-hero h1{
@@ -595,6 +613,13 @@ function dtzSponsorHTML(placement){
 function dtzHome(){
   return `
   <section class="dtz-hero">
+    <div class="dtz-hero-slides" aria-hidden="true">
+      <div class="dtz-hero-slide" style="background-image:url('images/hero-1.jpg')"></div>
+      <div class="dtz-hero-slide" style="background-image:url('images/hero-2.jpg')"></div>
+      <div class="dtz-hero-slide" style="background-image:url('images/hero-3.jpg')"></div>
+      <div class="dtz-hero-slide" style="background-image:url('images/hero-4.jpg')"></div>
+      <div class="dtz-hero-slide" style="background-image:url('images/hero-5.jpg')"></div>
+    </div>
     <div class="hero-shade">
       <div class="eyebrow">WELCOME TO DIRT TRACKERZ</div>
       <h1>THE HOME OF <span>DIRT TRACK RACING</span></h1>
