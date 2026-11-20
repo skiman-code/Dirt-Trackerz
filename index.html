@@ -346,13 +346,6 @@ a{color:var(--gold)}
   .mobilebar button.active{color:#ff6575}
   .pad{padding:15px}
 }
-/* Upgrade: sharper broadcast styling and accessible focus states */
-:root{--red:#dc142e;--gold:#edbd60}
-.btn,.tile,.card,.tab,.info,.sponsor,.dtz-presenting{border-radius:7px}
-.btn:focus-visible,.tile:focus-visible,.nav button:focus-visible,.field:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
-.dtz-hero{border-radius:8px}
-.dtz-hero h1{text-shadow:0 3px 12px #0009}
-@media(max-width:720px){.dtz-hero .btn{margin:4px 5px 4px 0}.topactions .btn{padding:8px 9px;font-size:12px}}
 </style>
 <style>
 .dtz-media-banner{background:linear-gradient(110deg,#6c0d20,#21171d 60%,#111318);border:1px solid #b58a42;padding:25px;margin:14px 0 20px;box-shadow:inset 0 2px #ffffff24}
@@ -370,6 +363,15 @@ a{color:var(--gold)}
 .dtz-media-checkbox input{margin-top:4px;min-width:19px;min-height:19px}
 .dtz-media-submit{width:100%;padding:16px}
 .dtz-media-submit:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.8)}
+</style>
+<style>
+/* DIRT TRACKERZ 2026 COMMUNITY EXPANSION — inherits existing palette */
+.dtz-cover{min-height:155px;background:linear-gradient(125deg,#8b152b,#242027 65%,#aa7936);border-bottom:2px solid var(--gold);background-size:cover;background-position:center}
+.dtz-avatar{width:76px;height:76px;border:3px solid var(--gold);background:#292c32;display:grid;place-items:center;font-weight:900;font-size:25px;flex-shrink:0;overflow:hidden}
+.dtz-avatar img{width:100%;height:100%;object-fit:cover}.dtz-tools{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}.dtz-tools>*{flex:0 1 auto}
+.dtz-rows{display:grid;gap:12px}.dtz-product{display:flex;align-items:center;gap:12px;background:#20252c;border:1px solid #43474c;padding:12px}.dtz-product img{width:86px;height:86px;object-fit:cover}
+.dtz-input{width:100%;background:#0d1116;border:1px solid #4b535e;color:#fff;padding:12px;margin:5px 0 12px}.dtz-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.dtz-metric{padding:17px;border:1px solid #594b37;background:#202329}.dtz-metric strong{display:block;color:var(--gold);font-size:24px}.dtz-table{width:100%;border-collapse:collapse}.dtz-table th,.dtz-table td{padding:11px;border-bottom:1px solid #444;text-align:left}.dtz-preview{color:#f5cf8d;font-size:12px}.dtz-pills{display:flex;flex-wrap:wrap;gap:8px}.dtz-pills span{border:1px solid #805f3c;padding:7px 10px;background:#282126}
+@media(max-width:720px){.dtz-grid{grid-template-columns:1fr}.dtz-product{align-items:flex-start}.dtz-table{font-size:12px}}
 </style>
 </head>
 <body>
@@ -540,6 +542,7 @@ const DTZ_ICONS = {
   media:'camera',
   stream:'video',
   supplier:'wrench',
+  merch:'wrench',
   podcast:'mic',
   announcer:'radio'
 };
@@ -552,6 +555,10 @@ const DTZ_NAV = [
   ['profiles','Community','profiles'],
   ['inbox','Messages','inbox'],
   ['partners','Partners','partners'],
+  ['studio','Creator Studio','media'],
+  ['discovery','Upcoming Events','tonight'],
+  ['rewards','Fan Rewards','fan'],
+  ['analytics','Sponsor Reports','partners'],
   ['admin','Owner Dashboard','admin']
 ];
 
@@ -561,8 +568,9 @@ const DTZ_TYPES = [
   ['track','Tracks & Promoters','Events, results, rainouts and broadcasts'],
   ['series','Racing Series','Schedules, standings and announcements'],
   ['media','Media Creators','Photography, videography and racing write-ups'],
-  ['stream','Streaming Service Providers','Broadcast schedules and official watch links'],
+  ['stream','Streaming Partners','Broadcast schedules and official watch links'],
   ['supplier','Suppliers','Racing manufacturers, products and services'],
+  ['merch','Merch Vendors','Racing merchandise and apparel'],
   ['podcast','Podcasters','Episodes, shows and racing discussions'],
   ['announcer','Announcers','Event schedules, highlights and bookings']
 ];
@@ -666,7 +674,23 @@ function dtzHome(){
       <h2>WHAT'S HOT</h2>
       <span class="tag">COMMUNITY HIGHLIGHTS</span>
     </div>
-    <div class="info"><h3>Nationwide community spotlight</h3><p class="muted">The highest-ranking eligible photo, video, podcast or story will appear here when community posts and engagement tracking go live. Rankings will account for unusual or spam activity.</p><button class="btn gold small" onclick="go('feed')">Explore the Community Feed</button></div>
+    <div class="dtz-photo-grid">
+      <div class="dtz-photo">
+        <strong>Trending Photos</strong>
+        <small>Featured racing photography</small>
+      </div>
+      <div class="dtz-photo">
+        <strong>Trending Drivers</strong>
+        <small>Follow the racing community</small>
+      </div>
+      <div class="dtz-photo">
+        <strong>Trending Events</strong>
+        <small>See what's happening at the track</small>
+      </div>
+    </div>
+    <p class="tiny muted">
+      Live trending rankings will appear when community activity tracking is connected.
+    </p>
   </section>
 
   <div class="sponsor">
@@ -700,7 +724,7 @@ function dtzHome(){
       <span class="tag">RACING COMMUNITY</span>
     </div>
     <div class="tiles">
-      ${DTZ_TYPES.filter(t=>!['podcast','announcer'].includes(t[0])).map(t=>`
+      ${DTZ_TYPES.map(t=>`
         <button class="tile" onclick="dtzShowType('${t[0]}')">
           ${dtzIcon(DTZ_ICONS[t[0]])}
           <strong>${t[1]}</strong>
@@ -708,7 +732,6 @@ function dtzHome(){
         </button>
       `).join('')}
     </div>
-    <div class="info" style="margin-top:14px"><h3>More from Media</h3><div class="tabs"><button class="btn dark small" onclick="dtzShowType('podcast')">Podcasts</button><button class="btn dark small" onclick="dtzShowType('announcer')">Announcers</button></div></div>
   </section>
 
   <section class="card pad">
@@ -825,7 +848,7 @@ const DTZ_PROFILE_DETAILS = {
     ]
   },
   stream:{
-    title:'Streaming Service Provider Profile',
+    title:'Streaming Partner Profile',
     subtitle:'Official live racing coverage and broadcast schedules.',
     sections:[
       ['Streaming Schedule','Upcoming broadcasts and event details.'],
@@ -847,6 +870,7 @@ const DTZ_PROFILE_DETAILS = {
       ['Contact','Business inquiries and community communication.']
     ]
   },
+  merch:{title:'Merch Vendor Profile',subtitle:'Official merchandise and racing apparel.',sections:[['Products','Up to 25 product listings with photos, prices and external checkout links.'],['Services','Custom merchandise, printing and fulfillment services.'],['Contact','Phone, email, address and in-app messages.'],['Partnerships','Marketing opportunities and sponsor reporting.']]},
   podcast:{
     title:'Podcaster Profile',
     subtitle:'Racing conversations, interviews and episodes.',
@@ -893,9 +917,7 @@ let dtzCurrentTrack = "";
 function dtzOpenTrack(name) {
   dtzCurrentTrack = name;
   const track = [
-    { name: "67 Speedway of Texarkana", state: "Arkansas" },
-    { name: "Boothill Speedway", state: "Louisiana" },
-    { name: "Ark-La-Tex Speedway", state: "Louisiana" }
+    // Populated from approved community track records after Supabase integration.
   ].find(t => t.name === name);
 
   if (!track) return;
@@ -961,11 +983,7 @@ const dtzFollowTrackOnline = (name) => window.dtzSaveTrackFollow?.(name);
 }
 
 function dtzTracksPage() {
-  const tracks = [
-    { name: "67 Speedway of Texarkana", state: "Arkansas" },
-    { name: "Boothill Speedway", state: "Louisiana" },
-    { name: "Ark-La-Tex Speedway", state: "Louisiana" }
-  ];
+  const tracks = []; // Show community-claimed tracks after database connection.
 
   return `
     <div class="eyebrow">DIRT TRACKERZ COMMUNITY</div>
@@ -993,7 +1011,7 @@ function dtzTracksPage() {
         `).join('')}
       </div>
       <p id="dtzNoTracks" style="display:none">
-        No matching tracks found.
+        No matching community tracks yet.
       </p>
     </section>
 
@@ -1002,7 +1020,7 @@ function dtzTracksPage() {
         <h2>Tracks You Follow</h2>
         <span class="tag">TOP 3</span>
       </div>
-      <p>Tracks saved on this device are shown below. Cross-device following will require account synchronization.</p>
+      <p>Your three most recently followed tracks will appear here once following is connected.</p>
       
 ${(() => {
   let followed = [];
@@ -1065,7 +1083,7 @@ function dtzFilterTracks(query) {
       </div>
 
       <div class="tiles">
-        ${DTZ_TYPES.filter(type=>!['podcast','announcer'].includes(type[0])).map(type=>`
+        ${DTZ_TYPES.map(type=>`
           <button class="tile"
             onclick="dtzShowType('${type[0]}')">
             ${dtzIcon(DTZ_ICONS[type[0]])}
@@ -1073,10 +1091,6 @@ function dtzFilterTracks(query) {
             <small>${dtzEscape(type[2])}</small>
           </button>
         `).join('')}
-      </div>
-      <div class="info" style="margin-top:14px">
-        <h3>Media specialties</h3>
-        <div class="tabs"><button class="btn dark small" onclick="dtzShowType('media')">Photographers & Videographers</button><button class="btn dark small" onclick="dtzShowType('podcast')">Podcasters</button><button class="btn dark small" onclick="dtzShowType('announcer')">Announcers</button></div>
       </div>
     </div>
   `;
@@ -1211,17 +1225,36 @@ function dtzShowEvent(id){
   go('event-detail');
 }
 
-let dtzEventsState='All States';
-function dtzEventsStateChange(value){dtzEventsState=value;go('events');}
 function dtzEventsPage(){
-  return `<div class="eyebrow">RACING SCHEDULE</div><h1 class="heading">EVENTS & RESULTS</h1>
-    <div class="card pad"><label class="eyebrow" for="dtzEventsState">STATE</label>
-      <select id="dtzEventsState" class="field" onchange="dtzEventsStateChange(this.value)" style="margin-top:10px">
-      ${['All States','Arkansas','Louisiana','Texas',...DTZ_OTHER_STATES].map(x=>`<option ${x===dtzEventsState?'selected':''}>${dtzEscape(x)}</option>`).join('')}</select></div>
-    <div class="notice">Official events and results for ${dtzEscape(dtzEventsState)} will appear when approved tracks connect their schedules and scoring data. No sample events are presented as real races.</div>
-    <div class="card pad"><h2>Race Results</h2><p class="muted">Feature, heat and B-main results, every finishing position, and DQ status will be displayed after track verification.</p></div>
-    <div class="card pad"><h2>Media Credentials</h2><p class="muted">The credential application is currently a browser-only preview. Applications are not delivered to tracks until secure submission and approval are connected.</p><button class="btn dark small" onclick="dtzShowEvent(1)">View Sample Event & Credential Preview</button></div>`;
+  return `
+    <div class="eyebrow">RACING SCHEDULE</div>
+    <h1 class="heading">EVENTS & RESULTS</h1>
+
+    <div class="notice">
+      These are sample event cards. Official schedules,
+      race results and rainout information will be
+      connected to verified tracks.
+    </div>
+
+    <div class="tabs">
+      <button class="tab active">Arkansas</button>
+      <button class="tab">Texas</button>
+      <button class="tab">Louisiana</button>
+    </div>
+
+    ${DTZ_DEMO_EVENTS.map(dtzEventCard).join('')}
+
+    <div class="card pad">
+      <h2>Official Race Results</h2>
+      <p class="muted">
+        Feature winners, heat race results, driver profiles
+        and championship standings will appear here
+        after verified results are connected.
+      </p>
+    </div>
+  `;
 }
+
 
 /* MEDIA CREDENTIAL APPLICATION — LOCAL PREVIEW ONLY
    Production requires authenticated Supabase records, verified media eligibility,
@@ -1334,7 +1367,7 @@ function dtzEventDetail(){
     </button>
 
     <div class="card pad" style="margin-top:15px">
-      <div class="eyebrow">SAMPLE EVENT · NOT A CONFIRMED RACE</div>
+      <div class="eyebrow">EVENT DETAILS</div>
       <h1>${dtzEscape(event.title)}</h1>
 
       <div class="twocol">
@@ -1371,7 +1404,7 @@ function dtzEventDetail(){
           <p>${dtzEscape(event.stream)}</p>
           <button class="btn gold small"
             onclick="dtzShowType('stream')">
-            Streaming Service Providers
+            Streaming Partners
           </button>
         </div>
 
@@ -1391,24 +1424,19 @@ function dtzEventDetail(){
 }
 
 function dtzTonightPage(){
-  const today = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
   return `
     <div class="eyebrow">TODAY'S RACING</div>
     <h1 class="heading">RACING TONIGHT</h1>
-    <p class="muted">${dtzEscape(today)} · All States</p>
-    <div class="card pad">
-      <label for="dtzTonightState" class="eyebrow">FILTER BY STATE</label>
-      <select id="dtzTonightState" class="field" onchange="dtzTonightStateChange(this.value)" style="margin-top:10px">
-        ${['All States','Arkansas','Louisiana','Texas',...DTZ_OTHER_STATES].map(state=>`<option ${state===dtzTonightState?'selected':''}>${dtzEscape(state)}</option>`).join('')}
-      </select>
+
+    <div class="notice">
+      Only events scheduled for the current day will
+      appear here when live schedules are connected.
+      The examples below are not confirmed races.
     </div>
-    <div class="notice">No verified race schedule has been connected for ${dtzEscape(dtzTonightState)} today. This does not mean racing is canceled. Check each track's official channels before traveling.</div>
-    <div class="card pad"><h2>For track representatives</h2><p class="muted">Publish events, start times, racing classes, rainouts and official watch links once track management is connected and approved.</p><button class="btn gold small" onclick="dtzShowType('track')">Explore Track Profiles</button></div>
+
+    ${DTZ_DEMO_EVENTS.map(dtzEventCard).join('')}
   `;
 }
-const DTZ_OTHER_STATES = ['Alabama','Alaska','Arizona','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
-let dtzTonightState='All States';
-function dtzTonightStateChange(state){dtzTonightState=state;go('tonight');}
 
 function dtzFeedPage(){
   return `
@@ -1584,6 +1612,10 @@ let dtzAuthReady = false;
 
 function go(page) {
   const pages = {
+    studio: dtzStudioPage,
+    rewards: dtzRewardsPage,
+    analytics: dtzAnalyticsPage,
+    discovery: dtzDiscoveryPage,
     home: dtzHome,
     profiles: dtzProfilesPage,
     tracks: dtzTracksPage,
@@ -1871,6 +1903,70 @@ function dtzUpdateAccountUI(user) {
     }
   });
 }
+
+
+/* DIRT TRACKERZ COMMUNITY UI — STAGING PREVIEW
+ * The forms and previews below intentionally do NOT publish to the public,
+ * grant permissions, send notifications, process payments or record verified metrics.
+ * Supabase RLS, server authorization, event validation and audited APIs come next.
+ */
+const DTZ_STATES=['All States','Arkansas','Louisiana','Texas','Oklahoma','Missouri','Kansas','Indiana','California','Florida','Georgia','Ohio','Illinois','Iowa','Tennessee','Mississippi','Alabama','North Carolina','South Carolina','Kentucky','Michigan','Wisconsin','Minnesota','Nebraska','New York','Pennsylvania','West Virginia','Virginia','Colorado','Arizona','New Mexico','Nevada','Oregon','Washington','Idaho','Montana','Wyoming','North Dakota','South Dakota','Utah','Maine','Vermont','New Hampshire','Massachusetts','Rhode Island','Connecticut','New Jersey','Delaware','Maryland','Hawaii','Alaska'];
+const DTZ_KINDS=['driver','track','series','media','stream','supplier','merch','podcast','announcer'];
+function dtzLocalRead(key,fallback){try{const v=JSON.parse(localStorage.getItem('dtz_ui_'+key));return v??fallback}catch{return fallback}}
+function dtzLocalWrite(key,value){localStorage.setItem('dtz_ui_'+key,JSON.stringify(value))}
+function dtzSafeURL(url){try{const u=new URL(url);return ['https:','http:'].includes(u.protocol)?u.href:''}catch{return ''}}
+function dtzFilePreview(input,target){const file=input.files?.[0];if(!file)return;if(!file.type.startsWith('image/')||file.size>4*1024*1024){dtzNotify('Choose an image smaller than 4 MB.');input.value='';return}const img=document.getElementById(target);if(img){const old=img.dataset.objectUrl;if(old)URL.revokeObjectURL(old);const next=URL.createObjectURL(file);img.src=next;img.dataset.objectUrl=next;img.hidden=false}dtzNotify('Image preview only. Upload will be connected in Supabase.')}
+function dtzStudioPage(){const kind=dtzLocalRead('kind','driver');return `
+<div class="eyebrow">PROFILE MANAGEMENT / DESIGN PREVIEW</div><h1 class="heading">CREATOR & ORGANIZATION STUDIO</h1>
+<div class="notice">Design preview only. Entries on this page stay in this browser; they are not published, approved, or sent to other members. Live saving and permissions are the next Supabase step.</div>
+<section class="card pad"><h2>Choose profile type</h2><select class="dtz-input" id="dtzStudioKind" onchange="dtzLocalWrite('kind',this.value);go('studio')">${DTZ_KINDS.map(k=>`<option value="${k}" ${k===kind?'selected':''}>${dtzEscape(DTZ_PROFILE_DETAILS[k]?.title||k)}</option>`).join('')}</select>
+<div class="dtz-cover" id="dtzCoverPreview"><div style="padding:14px;color:#fff">Cover photograph / banner</div></div><div class="dtz-tools"><label class="btn dark small">Preview Cover <input type="file" accept="image/*" hidden onchange="dtzCoverFile(this)"></label><label class="btn dark small">Preview Profile Photo / Logo <input type="file" accept="image/*" hidden onchange="dtzFilePreview(this,'dtzAvatarImage')"></label></div><div class="profilebar"><div class="dtz-avatar"><img id="dtzAvatarImage" alt="Profile preview" hidden></div><div class="grow"><input class="dtz-input" id="dtzStudioName" placeholder="Profile or business name"><textarea class="dtz-input" id="dtzStudioBio" rows="2" placeholder="Biography, coverage area, specialties, or organization overview"></textarea></div></div>
+<div class="dtz-tools"><button class="btn" onclick="go('inbox')">Message</button><button class="btn dark" onclick="dtzNotify('Follow and fan counts activate with Supabase.')">Become a Fan</button><button class="btn gold" onclick="dtzSaveStudioDraft()">Save Local Draft</button></div></section>
+${kind==='series'?dtzSeriesStudio():''}
+${['supplier','merch'].includes(kind)?dtzBusinessStudio():''}
+${kind==='podcast'?dtzPodcastStudio():''}
+${kind==='media'?dtzMediaStudio():''}
+${kind==='stream'?dtzStreamStudio():''}
+${['track','series'].includes(kind)?dtzResultsStudio():''}
+${kind==='track'?dtzTrackStudio():''}
+${kind==='driver'?`<section class="card pad"><h2>Driver Profile Sections</h2><div class="dtz-pills"><span>Posts</span><span>Results</span><span>Photos</span><span>Schedule</span><span>Sponsors</span><span>What's on the Car</span><span>Featured in Podcasts</span></div><p class="muted">Car photo, car number, class, team, chassis, shocks, engine, hometown, and partnership inquiries will be editable after profile data is connected.</p></section>`:''}
+<section class="card pad"><h2>Community Posts</h2><p class="muted">Photos, write-ups, race recaps, highlights and announcements. Comments, tags, checkered-flag reactions, black-flag reactions and shares will appear on published posts.</p><input class="dtz-input" placeholder="Headline" id="dtzPostHeadline"><textarea class="dtz-input" id="dtzPostBody" rows="3" placeholder="What happened at the event?"></textarea><input class="dtz-input" id="dtzPostLink" type="url" placeholder="Optional external coverage URL"><label class="btn dark small">Attach photo preview <input type="file" accept="image/*" hidden onchange="dtzFilePreview(this,'dtzPostPhoto')"></label><img id="dtzPostPhoto" alt="Post attachment preview" style="max-width:100%;max-height:220px;display:block;margin:10px 0" hidden><button class="btn gold" onclick="dtzSavePostPreview()">Preview Post</button><div id="dtzPostOutput"></div></section>
+<section class="card pad"><h2>Marketing Partnership Opportunities</h2><p class="muted">Every eligible profile can display partnership availability, receive inquiries, and access private sponsor reporting.</p><button class="btn gold" onclick="go('analytics')">Sponsor Analytics & Reports</button></section>`}
+function dtzCoverFile(input){const f=input.files?.[0];if(!f)return;if(!f.type.startsWith('image/')||f.size>4*1024*1024){dtzNotify('Choose an image smaller than 4 MB.');return}const el=document.getElementById('dtzCoverPreview');if(el.dataset.objectUrl)URL.revokeObjectURL(el.dataset.objectUrl);const url=URL.createObjectURL(f);el.dataset.objectUrl=url;el.style.backgroundImage=`url("${url}")`;dtzNotify('Cover preview only; not uploaded.')}
+function dtzSaveStudioDraft(){dtzLocalWrite('draft_'+document.getElementById('dtzStudioKind').value,{name:document.getElementById('dtzStudioName').value,bio:document.getElementById('dtzStudioBio').value});dtzNotify('Draft saved on this device only.')}
+function dtzSavePostPreview(){const title=document.getElementById('dtzPostHeadline').value.trim();const body=document.getElementById('dtzPostBody').value.trim();const link=dtzSafeURL(document.getElementById('dtzPostLink').value);if(!title&&!body){dtzNotify('Enter a headline or post text.');return}document.getElementById('dtzPostOutput').innerHTML=`<div class="info" style="margin-top:14px"><span class="tag">UNPUBLISHED PREVIEW</span><h3>${dtzEscape(title)}</h3><p>${dtzEscape(body)}</p>${link?`<a href="${dtzEscape(link)}" target="_blank" rel="noopener noreferrer">Open external coverage</a>`:''}<div class="dtz-pills" style="margin-top:12px"><span>Checkered Flag</span><span>Black Flag</span><span>Comment</span><span>Tag</span><span>Share</span></div></div>`}
+function dtzSeriesStudio(){return `<section class="card pad"><h2>Series Classes & Staff</h2><p class="muted">Add any number of classes. Each class may have multiple administrators, race directors and timing/scoring officials. The series owner controls assignments.</p><div class="dtz-grid"><div><label>Class name</label><input class="dtz-input" id="dtzClassName" placeholder="e.g. 410 Sprint Cars"></div><div><label>Assigned officials (one per line; role: name)</label><textarea class="dtz-input" id="dtzClassStaff" rows="3" placeholder="Administrator: ...&#10;Race Director: ...&#10;Scoring: ..."></textarea></div></div><button class="btn gold" onclick="dtzAddClass()">Add Class to Preview</button><div id="dtzClassList">${dtzClassRows()}</div><p class="dtz-preview">Role permissions and official invitations will require verified accounts and owner approval.</p></section>`}
+function dtzClassRows(){return dtzLocalRead('classes',[]).map((x,i)=>`<div class="info" style="margin-top:10px"><strong>${dtzEscape(x.name)}</strong><p class="muted" style="white-space:pre-wrap">${dtzEscape(x.staff)}</p><button class="btn dark small" onclick="dtzRemoveClass(${i})">Remove</button></div>`).join('')}
+function dtzAddClass(){const name=document.getElementById('dtzClassName').value.trim();if(!name)return dtzNotify('Enter a class name.');const rows=dtzLocalRead('classes',[]);rows.push({name,staff:document.getElementById('dtzClassStaff').value});dtzLocalWrite('classes',rows);document.getElementById('dtzClassList').innerHTML=dtzClassRows();document.getElementById('dtzClassName').value='';document.getElementById('dtzClassStaff').value=''}
+function dtzRemoveClass(i){const rows=dtzLocalRead('classes',[]);rows.splice(i,1);dtzLocalWrite('classes',rows);document.getElementById('dtzClassList').innerHTML=dtzClassRows()}
+function dtzBusinessStudio(){return `<section class="card pad"><h2>Products & Services <span class="tag">UP TO 25</span></h2><p class="muted">Only entered products are displayed—no empty spaces. Each product can link to its exact page on the vendor's website; a general store link is the fallback. No Dirt Trackerz checkout.</p><div class="dtz-grid"><div><input class="dtz-input" id="dtzProductName" placeholder="Product / service name"><input class="dtz-input" id="dtzProductPrice" placeholder="Price or request a quote"><input class="dtz-input" id="dtzProductPhoto" type="url" placeholder="Product image URL (optional)"></div><div><input class="dtz-input" id="dtzProductLink" type="url" placeholder="Exact product URL or business website"><textarea class="dtz-input" id="dtzProductDesc" rows="3" placeholder="Product details / services"></textarea></div></div><button class="btn gold" onclick="dtzAddProduct()">Add Product</button><p id="dtzProductCount" class="tiny muted"></p><div id="dtzProducts" class="dtz-rows">${dtzProductRows()}</div></section><section class="card pad"><h2>Business Contact</h2><div class="dtz-grid"><input class="dtz-input" placeholder="Business email" type="email"><input class="dtz-input" placeholder="Phone number" type="tel"><input class="dtz-input" placeholder="Business address"><input class="dtz-input" placeholder="Official website" type="url"></div><div class="dtz-tools"><button class="btn dark" onclick="dtzNotify('Contact details will activate with the verified profile.')">Call / Email</button><button class="btn" onclick="go('inbox')">Message</button></div></section>`}
+function dtzProductRows(){const rows=dtzLocalRead('products',[]);return rows.map((x,i)=>`<div class="dtz-product">${x.photo?`<img src="${dtzEscape(x.photo)}" alt="${dtzEscape(x.name)}" onerror="this.hidden=true">`:''}<div class="grow"><strong>${dtzEscape(x.name)}</strong><p class="tiny">${dtzEscape(x.price)} · ${dtzEscape(x.desc)}</p>${x.link?`<a href="${dtzEscape(x.link)}" target="_blank" rel="noopener noreferrer">View on vendor website</a>`:''}</div><button class="btn dark small" onclick="dtzRemoveProduct(${i})">Remove</button></div>`).join('')}
+function dtzAddProduct(){const rows=dtzLocalRead('products',[]);if(rows.length>=25)return dtzNotify('Maximum 25 product listings.');const name=document.getElementById('dtzProductName').value.trim();if(!name)return dtzNotify('Enter a product name.');rows.push({name,price:document.getElementById('dtzProductPrice').value,desc:document.getElementById('dtzProductDesc').value,photo:dtzSafeURL(document.getElementById('dtzProductPhoto').value),link:dtzSafeURL(document.getElementById('dtzProductLink').value)});dtzLocalWrite('products',rows);document.getElementById('dtzProducts').innerHTML=dtzProductRows();document.getElementById('dtzProductCount').textContent=rows.length+' of 25 listings used'}
+function dtzRemoveProduct(i){const rows=dtzLocalRead('products',[]);rows.splice(i,1);dtzLocalWrite('products',rows);document.getElementById('dtzProducts').innerHTML=dtzProductRows();document.getElementById('dtzProductCount').textContent=rows.length+' of 25 listings used'}
+function dtzPodcastStudio(){return `<section class="card pad"><h2>Podcast Episodes & Featured Guests</h2><p class="muted">Share episodes hosted on Facebook, YouTube, Twitch or other platforms. Tag drivers, tracks or series so the episode can appear under Featured in Podcasts after approval and database linking.</p><input class="dtz-input" placeholder="Episode title"><input class="dtz-input" type="url" placeholder="Episode's official external link"><input class="dtz-input" placeholder="Tag driver / track / series (profile lookup after Supabase)"><button class="btn gold" onclick="dtzNotify('Episode publishing and verified profile tagging will be connected in Supabase.')">Preview Episode Link</button></section>`}
+function dtzMediaStudio(){return `<section class="card pad"><h2>Media Creator Portfolio</h2><div class="dtz-pills"><span>Posts (default)</span><span>Portfolio: 10 favorites</span><span>Videos: external links</span><span>About & Coverage Areas</span><span>Bookings</span><span>External Galleries</span></div><p class="muted">Portfolio images will be uploaded to Supabase Storage after media approval. Videos remain on the creator's existing platforms. Photo sales on Dirt Trackerz: Coming Soon.</p></section>`}
+function dtzStreamStudio(){return `<section class="card pad"><h2>Streaming Service Provider</h2><div class="dtz-pills"><span>Upcoming Broadcasts</span><span>Connected Tracks</span><span>Watch Live (external)</span><span>Race Recaps</span><span>Highlights</span><span>Rainout Notifications</span></div><p class="muted">Track owners approve the first track/provider connection. Providers do not manage championship point standings.</p></section>`}
+function dtzTrackStudio(){return `<section class="card pad"><h2>Track Claim & Staff</h2><p class="muted">Create a personal owner account, claim your track, and invite approved promoters, race directors, scoring officials and other staff. Owner approval is required for linked streaming providers and staff roles.</p><div class="dtz-tools"><button class="btn gold" onclick="dtzNotify('Track claiming and verification will be enabled through Supabase.')">Claim Your Track</button><button class="btn dark" onclick="dtzNotify('Staff invitations will require verified account roles.')">Manage Staff</button></div></section>`}
+function dtzResultsStudio(){return `<section class="card pad"><h2>Race Results & Championship Points</h2><p class="muted">Publish a feature winner or top-three photograph above the update, then share top-five points with a link to the official complete standings. Authorized staff can submit results instantly within their assigned class permissions.</p><div class="dtz-grid"><input class="dtz-input" id="dtzResultClass" placeholder="Class / division"><select class="dtz-input" id="dtzResultType"><option>Feature Winner</option><option>Top Three</option><option>Top Five Points</option><option>Complete Race Results</option><option>Rainout / Delay / Postponement</option></select></div><textarea class="dtz-input" id="dtzResultText" rows="4" placeholder="Enter race results, standings or event update"></textarea><input class="dtz-input" id="dtzPointsURL" type="url" placeholder="Official full points standings URL (optional)"><div class="dtz-tools"><button class="btn dark" onclick="dtzDictate('dtzResultText')">Microphone / Dictate</button><label class="btn dark">Headline Photo <input type="file" accept="image/*" hidden onchange="dtzFilePreview(this,'dtzResultPhoto')"></label><button class="btn gold" onclick="dtzResultPreview()">Preview Update</button></div><img id="dtzResultPhoto" alt="Result headline photograph" style="max-width:100%;max-height:220px" hidden><div id="dtzResultOutput"></div><p class="dtz-preview">Voice recognition requires browser support and microphone permission. Drafts are not official until authorized publishing is connected.</p></section>`}
+function dtzDictate(id){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return dtzNotify('Speech recognition is not available in this browser. Use your keyboard microphone or type instead.');const rec=new SR();rec.lang='en-US';rec.onresult=e=>{const el=document.getElementById(id);el.value+=(el.value?' ':'')+e.results[0][0].transcript};rec.onerror=()=>dtzNotify('Microphone transcription unavailable.');rec.start()}
+function dtzResultPreview(){const kind=document.getElementById('dtzResultType').value;const body=document.getElementById('dtzResultText').value;const url=dtzSafeURL(document.getElementById('dtzPointsURL').value);document.getElementById('dtzResultOutput').innerHTML=`<div class="info" style="margin-top:14px"><span class="tag">UNPUBLISHED ${dtzEscape(kind)}</span><h3>${dtzEscape(document.getElementById('dtzResultClass').value)}</h3><p style="white-space:pre-wrap">${dtzEscape(body)}</p>${url?`<a href="${dtzEscape(url)}" target="_blank" rel="noopener noreferrer">Official full point standings</a>`:''}<p class="tiny muted">Comments · Tag · React · Share (after Supabase)</p></div>`}
+function dtzDiscoveryPage(){return `<div class="eyebrow">RACING COMMUNITY / UPCOMING</div><h1 class="heading">UPCOMING EVENTS</h1><section class="card pad"><div class="tabs"><button class="tab active" id="dtzLocalButton" onclick="dtzChooseDiscovery('local')">Local (250 miles)</button><button class="tab" id="dtzNationalButton" onclick="dtzChooseDiscovery('national')">National</button></div><div id="dtzDiscoveryOptions"><button class="btn gold" onclick="dtzAskLocation()">Allow Location for Local Events</button></div><div id="dtzDiscoveryResults" class="notice">Only events created by participating community tracks and series will appear. No outside events are imported.</div></section><section class="card pad"><h2>Event Check-In</h2><p class="muted">With your permission, check-in will verify that you're near the racetrack during an active event. Location will not be continuously tracked in this website preview.</p><button class="btn dark" onclick="dtzAskLocation()">Check Location Permission</button><p class="dtz-preview">Verified attendance, track fan rewards and geofence checks require a server-side event and location verification process.</p></section>`}
+function dtzChooseDiscovery(mode){document.getElementById('dtzLocalButton').classList.toggle('active',mode==='local');document.getElementById('dtzNationalButton').classList.toggle('active',mode==='national');document.getElementById('dtzDiscoveryOptions').innerHTML=mode==='local'?'<button class="btn gold" onclick="dtzAskLocation()">Allow Location for Local Events</button>':`<label>Search by state or track name</label><select class="dtz-input" id="dtzDiscoveryState">${DTZ_STATES.map(x=>`<option>${dtzEscape(x)}</option>`).join('')}</select><input class="dtz-input" placeholder="Track name" id="dtzDiscoveryTrack"><button class="btn gold" onclick="dtzNotify('Search will show community-published events once Supabase is connected.')">Search Upcoming Events</button>`}
+function dtzAskLocation(){if(!navigator.geolocation)return dtzNotify('Location is unavailable in this browser.');navigator.geolocation.getCurrentPosition(()=>dtzNotify('Location permission granted. Event matching and check-in verification will activate after Supabase.'),()=>dtzNotify('Location permission denied or unavailable. National search remains available.'),{enableHighAccuracy:false,timeout:12000,maximumAge:60000})}
+function dtzRewardsPage(){return `<div class="eyebrow">FAN COMMUNITY</div><h1 class="heading">FAN REWARDS</h1><section class="card pad"><h2>Bronze · Silver · Gold · Platinum</h2><p>Fan reward collections are earned separately for each driver, track, series, media creator, podcaster, announcer, streaming provider and eligible business profile you support.</p><div class="dtz-pills"><span>Bronze</span><span>Silver</span><span>Gold</span><span>Platinum</span></div><h3>Platinum Sharing Rule</h3><p>Maintain a <strong>95% or higher share rate</strong> across eligible posts published by that profile in the <strong>last 30 days</strong>. A single eligible post shared once can qualify for Platinum.</p><p class="muted">Sharing must be verified, not merely claimed. Rewards update as new eligible posts appear or the 30-day window changes. Bronze, Silver and Gold thresholds will be finalized before activation.</p></section><section class="card pad"><h2>Track Attendance Rewards</h2><p class="muted">Verified event check-ins can contribute to track-specific fan rewards. Attendance points and anti-abuse rules will be configured after event verification is implemented.</p></section>`}
+function dtzAnalyticsPage(){return `<div class="eyebrow">PRIVATE SPONSOR INTELLIGENCE</div><h1 class="heading">SPONSOR ANALYTICS & REPORTS</h1><div class="notice">Report designer preview: figures are not collected yet. No sponsor performance statistics are invented. Verified impressions and clicks will come from secure Supabase tracking.</div><section class="card pad"><h2>Select Sponsors</h2><p class="muted">Select one sponsor or multiple sponsors. Each selected sponsor receives a <strong>separate</strong> printable report containing only their own statistics. Account owners can view all sponsors privately.</p><div id="dtzSponsorChoices" class="dtz-rows">${dtzSponsorChoices()}</div><div class="dtz-tools"><button class="btn dark small" onclick="dtzToggleSponsors(true)">Select All</button><button class="btn dark small" onclick="dtzToggleSponsors(false)">Clear All</button></div><div class="dtz-grid"><div><label>From</label><input class="dtz-input" type="date" id="dtzReportFrom"></div><div><label>Through</label><input class="dtz-input" type="date" id="dtzReportTo"></div></div><div class="dtz-tools"><button class="btn gold" onclick="dtzPrintSponsorReports()">Print / Save PDF</button><button class="btn dark" onclick="dtzEmailSponsorReport()">Prepare Email</button></div><p class="dtz-preview">Print/PDF output is labeled as an unpopulated template until verified analytics are available. Sponsor email sending will require secure authorization.</p></section><section class="card pad"><h2>Private Account Analytics</h2><div class="dtz-grid">${['Profile Views','Unique Visitors','New Fans','Content Engagement','Sponsor Impressions','Sponsor Clicks','Podcast Referrals','Event Interest'].map(x=>`<div class="dtz-metric"><strong>—</strong>${x}</div>`).join('')}</div><p class="muted">Drivers, tracks, series, streaming providers, podcasters, media and businesses receive account-specific analytics and partnership reports.</p></section>`}
+function dtzSponsorChoices(){const rows=dtzLocalRead('sponsors',[]);return rows.length?rows.map((x,i)=>`<label class="info"><input type="checkbox" class="dtzSponsorCheck" value="${i}"> ${dtzEscape(x)}</label>`).join(''):'<p class="muted">No sponsors entered in this browser preview. Add sponsor names below.</p><input class="dtz-input" id="dtzSponsorNew" placeholder="Sponsor name"><button class="btn gold" onclick="dtzAddSponsor()">Add Sponsor</button>'}
+function dtzAddSponsor(){const name=document.getElementById('dtzSponsorNew')?.value.trim();if(!name)return;const a=dtzLocalRead('sponsors',[]);a.push(name);dtzLocalWrite('sponsors',a);document.getElementById('dtzSponsorChoices').innerHTML=dtzSponsorChoices()+'<button class="btn dark small" onclick="dtzSponsorAddField()">Add Another Sponsor</button>'}
+function dtzSponsorAddField(){document.getElementById('dtzSponsorChoices').insertAdjacentHTML('beforeend','<input class="dtz-input" id="dtzSponsorNew" placeholder="Sponsor name"><button class="btn gold" onclick="dtzAddSponsor()">Add Sponsor</button>')}
+function dtzToggleSponsors(on){document.querySelectorAll('.dtzSponsorCheck').forEach(x=>x.checked=on)}
+function dtzSelectedSponsors(){const a=dtzLocalRead('sponsors',[]);return [...document.querySelectorAll('.dtzSponsorCheck:checked')].map(x=>a[Number(x.value)]).filter(Boolean)}
+function dtzPrintSponsorReports(){const names=dtzSelectedSponsors();if(!names.length)return dtzNotify('Select at least one sponsor.');const from=document.getElementById('dtzReportFrom').value||'Not selected';const to=document.getElementById('dtzReportTo').value||'Not selected';if(from!=='Not selected'&&to!=='Not selected'&&from>to)return dtzNotify('The end date must follow the start date.');const content=names.map(n=>`<section style="page-break-after:always;min-height:80vh"><h1>DIRT TRACKERZ</h1><h2>PRIVATE SPONSOR PERFORMANCE REPORT</h2><h3>${dtzEscape(n)}</h3><p>Reporting period: ${dtzEscape(from)} through ${dtzEscape(to)}</p><hr><p>Impressions: Not yet connected</p><p>Clicks: Not yet connected</p><p>Engagement: Not yet connected</p><p><strong>PREVIEW TEMPLATE — NOT VERIFIED PERFORMANCE DATA</strong></p><small>Prepared for ${dtzEscape(n)} only. Other sponsors' metrics are excluded.</small></section>`).join('');const w=window.open('','_blank');if(!w)return dtzNotify('Allow pop-ups to print reports.');w.document.write('<!doctype html><html><head><title>Dirt Trackerz Sponsor Reports</title><style>body{font-family:Arial;padding:35px;color:#161616}h1{color:#b3152b}h2{color:#99712e}@media print{section{break-after:page}}</style></head><body>'+content+'</body></html>');w.document.close();w.focus();setTimeout(()=>w.print(),350)}
+function dtzEmailSponsorReport(){const names=dtzSelectedSponsors();if(names.length!==1)return dtzNotify('Choose one sponsor for a private email draft.');const subject=encodeURIComponent('Dirt Trackerz Sponsor Performance Report — '+names[0]);const body=encodeURIComponent('Hello,\n\nPlease find your private sponsor report attached.\n\nNote: Export the report to PDF and attach it before sending. Verified analytics are not yet connected.');window.location.href='mailto:?subject='+subject+'&body='+body}
+const dtzOriginalHome=dtzHome;dtzHome=function(){return dtzOriginalHome()+`<section class="card pad"><h2>EXPLORE UPCOMING EVENTS</h2><p class="muted">Find local community races within 250 miles or search nationally by state and track.</p><button class="btn gold" onclick="go('discovery')">Local / National Events</button></section><section class="card pad"><h2>RACING COMMUNITY TOOLS</h2><div class="dtz-tools"><button class="btn" onclick="go('studio')">Manage Profiles & Posts</button><button class="btn dark" onclick="go('rewards')">Fan Rewards</button><button class="btn dark" onclick="go('analytics')">Sponsor Reports</button></div></section>`};
+const dtzOriginalProfile=dtzProfileDetail;dtzProfileDetail=function(){return dtzOriginalProfile()+`<section class="card pad"><h2>Profile Features</h2><div class="dtz-tools"><button class="btn gold" onclick="go('studio')">Open Profile Studio</button><button class="btn dark" onclick="go('analytics')">Sponsor Reporting</button><button class="btn dark" onclick="go('inbox')">Message</button></div><p class="muted">Profile fan counter, verified posts, tagging, Featured in Podcasts, and comments will be connected through the community database.</p></section>`};
+const dtzOriginalFeed=dtzFeedPage;dtzFeedPage=function(){return dtzOriginalFeed()+`<section class="card pad"><h2>Post & Share</h2><p class="muted">All published posts will support approved comments, tags, checkered and black flag reactions, and sharing. Platinum fan rewards require verified shares of at least 95% of eligible posts from the past 30 days.</p><button class="btn gold" onclick="go('studio')">Create a Post</button></section>`};
+const dtzOriginalEvents=dtzEventsPage;dtzEventsPage=function(){return `<div class="notice">Events & Results is for completed races. For future racing, use Upcoming Events or Racing Tonight.</div><button class="btn gold" onclick="go('discovery')">Upcoming Events</button>`+dtzOriginalEvents()};
+const dtzOriginalAdmin=dtzAdminPage;dtzAdminPage=function(){return dtzOriginalAdmin()+`<section class="card pad"><h2>Additional Management Modules</h2><div class="dtz-pills"><span>Series Class Roles</span><span>Staff Approval</span><span>Event & Results Publishing</span><span>Rainout Notifications</span><span>Verified Fan Check-Ins</span><span>Sponsor Analytics</span><span>Moderation & Audit Logs</span></div><p class="dtz-preview">Access to actual owner-only information will be enforced on the server, not by hiding buttons.</p></section>`};
 
 /* INITIAL WEBSITE RENDER */
 document.addEventListener("DOMContentLoaded", () => {
