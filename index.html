@@ -348,6 +348,23 @@ a{color:var(--gold)}
   .pad{padding:15px}
 }
 </style>
+<style>
+.dtz-media-banner{background:linear-gradient(110deg,#6c0d20,#21171d 60%,#111318);border:1px solid #b58a42;padding:25px;margin:14px 0 20px;box-shadow:inset 0 2px #ffffff24}
+.dtz-media-banner h2{font-size:clamp(24px,4vw,38px);margin:10px 0}
+.dtz-media-rule{border:0;border-top:1px solid #6a503a;margin:25px 0}
+#dtzMediaForm label{display:block;color:#f1d39b;font-weight:700;margin:12px 0 7px}
+#dtzMediaForm .auth-grid label{font-size:12px}
+.dtz-media-options{display:grid;gap:10px;margin:14px 0}
+.dtz-media-options label{border:1px solid #65503a;background:#202126;padding:15px;margin:0!important;cursor:pointer}
+.dtz-media-options input,.dtz-media-checkbox input{accent-color:#d71930}
+.dtz-media-warning{color:#f1c06d;font-size:19px;line-height:1.35}
+.dtz-media-agreement{height:260px;overflow-y:auto;white-space:pre-wrap;line-height:1.7;background:#0b0d10;border:2px solid #9c783d;padding:17px;color:#f4f4f4;font-size:14px}
+.dtz-media-agreement:focus{outline:2px solid #dfb45c}
+.dtz-media-checkbox{display:flex!important;gap:12px;align-items:flex-start;margin:17px 0!important}
+.dtz-media-checkbox input{margin-top:4px;min-width:19px;min-height:19px}
+.dtz-media-submit{width:100%;padding:16px}
+.dtz-media-submit:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.8)}
+</style>
 </head>
 <body>
 
@@ -1229,6 +1246,104 @@ function dtzEventsPage(){
   `;
 }
 
+
+/* MEDIA CREDENTIAL APPLICATION — LOCAL PREVIEW ONLY
+   Production requires authenticated Supabase records, verified media eligibility,
+   track/promoter authorization, immutable agreement versions and audit logging. */
+const DTZ_MEDIA_AGREEMENT = "MEDIA SAFETY ACKNOWLEDGMENT & ASSUMPTION OF RISK\n\nI understand that dirt track racing is an inherently dangerous motorsport and that serious bodily injury, permanent disability, or death may occur while attending or covering a racing event.\n\nI acknowledge that race cars, flying debris, loose wheels, equipment failures, collisions, fires, and other unexpected hazards can occur at any time.\n\nI understand that receiving media credentials does not guarantee my safety or authorize me to enter restricted areas without permission.\n\nI accept personal responsibility for remaining alert, maintaining awareness of my surroundings, following all track safety rules, obeying instructions from authorized track officials, and avoiding unsafe positions or conduct.\n\nI acknowledge that my own negligence or failure to follow safety instructions may result in serious injury or death.\n\nI understand that Dirt Trackerz media credential approval does not replace the racetrack's required liability waiver, release form, or on-site credentialing procedures. I must complete all requirements established by the racetrack before receiving access.\n\nBy submitting this application, I acknowledge these risks and voluntarily accept the inherent risks associated with my participation in motorsports media coverage.";
+const DTZ_MEDIA_AGREEMENT_VERSION = "preview-2026-11-20-v1";
+const DTZ_MEDIA_OUTLETS = ["Dirt on Dirt","Dirt Track Digest","SPEED SPORT","FloRacing","RACER","Motorsport.com","ESPN","FOX Sports"];
+let dtzMediaScrolled = false;
+function dtzMediaApplications(){
+  try { return JSON.parse(localStorage.getItem("dtzMediaCredentialPreview") || "[]"); }
+  catch(e){return [];}
+}
+function dtzMediaPreviewStatus(eventId){
+  const a=dtzMediaApplications().find(x=>x.eventId===eventId);
+  return a ? `<div class="notice">Local preview request: <strong>${dtzEscape(a.status)}</strong><br><small>Saved only in this browser; the racetrack has NOT received an application.</small></div>` : "";
+}
+function dtzMediaApply(id){
+  dtzSelectedEvent=id;
+  go("media-apply");
+}
+function dtzMediaCoverageChange(){
+  const kind=document.querySelector('input[name="dtzCoverage"]:checked')?.value;
+  document.getElementById("dtzTeamsFields").hidden=kind!=="teams";
+  document.getElementById("dtzOutletFields").hidden=kind!=="outlet";
+}
+function dtzMediaScrollCheck(el){
+  if(el.scrollTop + el.clientHeight >= el.scrollHeight - 12){
+    dtzMediaScrolled=true;
+    document.getElementById("dtzMediaAgree").disabled=false;
+  }
+}
+function dtzMediaAgreeChange(){
+  document.getElementById("dtzMediaSubmit").disabled=
+    !(dtzMediaScrolled && document.getElementById("dtzMediaAgree").checked);
+}
+function dtzMediaApplyPage(){
+  const event=DTZ_DEMO_EVENTS.find(x=>x.id===dtzSelectedEvent);
+  if(!event)return dtzEventsPage();
+  dtzMediaScrolled=false;
+  return `<div class="eyebrow">DIRT TRACKERZ / EVENT MEDIA ACCESS</div>
+  <h1 class="heading">MEDIA CREDENTIAL APPLICATION</h1>
+  <div class="dtz-media-banner"><span class="eyebrow">EVENT PRESS ACCESS</span>
+    <h2>${dtzEscape(event.title)}</h2>
+    <p>${dtzEscape(event.track)} · ${dtzEscape(event.date)}</p>
+    <span class="tag">INTERACTIVE PREVIEW — NOT A LIVE REQUEST</span>
+  </div>
+  ${dtzMediaPreviewStatus(event.id)}
+  <form id="dtzMediaForm" class="card pad" onsubmit="dtzMediaSubmitPreview(event);return false;">
+    <div class="eyebrow">01 / APPLICANT INFORMATION</div>
+    <p class="muted tiny">In production, verified media identity and portfolio will populate from your signed-in profile.</p>
+    <div class="auth-grid">
+      <div><label for="dtzMediaName">Applicant name</label><input id="dtzMediaName" required maxlength="100" placeholder="Full name"></div>
+      <div><label for="dtzMediaBusiness">Media business / publication</label><input id="dtzMediaBusiness" maxlength="120" placeholder="Business or independent"></div>
+      <div><label for="dtzMediaRole">Media role</label><select id="dtzMediaRole" required><option value="">Select role</option><option>Photographer</option><option>Videographer</option><option>Photographer & Videographer</option><option>Reporter / Writer</option><option>Broadcast Media</option></select></div>
+      <div><label for="dtzMediaPortfolio">Portfolio / previous work URL</label><input id="dtzMediaPortfolio" type="url" placeholder="https://..."></div>
+    </div>
+    <hr class="dtz-media-rule">
+    <div class="eyebrow">02 / COVERAGE TYPE</div>
+    <div class="dtz-media-options">
+      <label><input type="radio" name="dtzCoverage" value="freelance" checked onchange="dtzMediaCoverageChange()"> Freelance / General Event Coverage</label>
+      <label><input type="radio" name="dtzCoverage" value="teams" onchange="dtzMediaCoverageChange()"> Working With Specific Race Teams or Drivers</label>
+      <label><input type="radio" name="dtzCoverage" value="outlet" onchange="dtzMediaCoverageChange()"> Working for an Accredited Media Outlet</label>
+    </div>
+    <div id="dtzTeamsFields" hidden><label for="dtzMediaTeams">Teams / drivers you intend to cover (list all)</label><textarea class="field" id="dtzMediaTeams" rows="3"></textarea></div>
+    <div id="dtzOutletFields" hidden><label for="dtzMediaOutlet">Media outlet</label><input class="field" id="dtzMediaOutlet" list="dtzMediaOutletList" placeholder="Search or type your outlet"><datalist id="dtzMediaOutletList">${DTZ_MEDIA_OUTLETS.map(x=>`<option value="${dtzEscape(x)}">`).join("")}</datalist><p class="tiny muted">Unlisted outlets require separate verification. Selecting an outlet does not verify affiliation or grant access.</p></div>
+    <label for="dtzMediaPlans">Coverage plans</label><textarea class="field" id="dtzMediaPlans" rows="3" maxlength="1500" required placeholder="Describe what you plan to photograph, film, or report."></textarea>
+    <hr class="dtz-media-rule">
+    <div class="eyebrow">03 / MUST READ</div>
+    <h2 class="dtz-media-warning">MEDIA SAFETY ACKNOWLEDGMENT & ASSUMPTION OF RISK</h2>
+    <p class="tiny muted">Read the complete agreement and scroll to the bottom to unlock acknowledgment.</p>
+    <div class="dtz-media-agreement" id="dtzMediaAgreement" tabindex="0" role="region" aria-label="Media safety agreement" onscroll="dtzMediaScrollCheck(this)">${dtzEscape(DTZ_MEDIA_AGREEMENT)}</div>
+    <label class="dtz-media-checkbox"><input id="dtzMediaAgree" type="checkbox" disabled onchange="dtzMediaAgreeChange()"> I have read, understand, and agree to the Media Safety Acknowledgment & Assumption of Risk.</label>
+    <p class="tiny muted">The racetrack's own liability waiver and on-site procedures are separate and still required. Track management makes all credential decisions.</p>
+    <button class="btn gold dtz-media-submit" id="dtzMediaSubmit" type="submit" disabled>SUBMIT CREDENTIAL REQUEST (LOCAL PREVIEW)</button>
+    <p class="tiny muted">Preview only: saves a pending example on this device. No request, notification, approval, or legal record is transmitted.</p>
+  </form>`;
+}
+function dtzMediaSubmitPreview(){
+  const f=document.getElementById("dtzMediaForm");
+  if(!f.reportValidity() || !dtzMediaScrolled || !document.getElementById("dtzMediaAgree").checked)return;
+  const kind=document.querySelector('input[name="dtzCoverage"]:checked').value;
+  const teams=document.getElementById("dtzMediaTeams").value.trim();
+  const outlet=document.getElementById("dtzMediaOutlet").value.trim();
+  if(kind==="teams"&&!teams){alert("List all teams or drivers you plan to cover.");return;}
+  if(kind==="outlet"&&!outlet){alert("Select or enter a media outlet.");return;}
+  const entry={eventId:dtzSelectedEvent,name:document.getElementById("dtzMediaName").value.trim(),
+    business:document.getElementById("dtzMediaBusiness").value.trim(),
+    role:document.getElementById("dtzMediaRole").value,portfolio:document.getElementById("dtzMediaPortfolio").value,
+    coverage:kind,teams,outlet,plans:document.getElementById("dtzMediaPlans").value.trim(),
+    agreementVersion:DTZ_MEDIA_AGREEMENT_VERSION,agreementText:DTZ_MEDIA_AGREEMENT,
+    acknowledgedAt:new Date().toISOString(),status:"Pending (local preview)"};
+  const entries=dtzMediaApplications().filter(x=>x.eventId!==dtzSelectedEvent);
+  entries.push(entry);
+  try{localStorage.setItem("dtzMediaCredentialPreview",JSON.stringify(entries));}
+  catch(e){alert("Could not save preview in this browser.");return;}
+  dtzShowEvent(dtzSelectedEvent);
+}
+
 function dtzEventDetail(){
   const event=DTZ_DEMO_EVENTS.find(
     item=>item.id===dtzSelectedEvent
@@ -1288,6 +1403,12 @@ function dtzEventDetail(){
           <h3>Race Results</h3>
           <p>Awaiting verified official results.</p>
         </div>
+      </div>
+      <div class="info" style="margin-top:15px">
+        <h3>Media Coverage & Credentials</h3>
+        <p class="muted">Verified media may request event credentials. Track approval and on-site waiver are required.</p>
+        ${dtzMediaPreviewStatus(event.id)}
+        <button class="btn gold" onclick="dtzMediaApply(${event.id})">Apply for Media Credentials</button>
       </div>
     </div>
   `;
@@ -1489,6 +1610,7 @@ function go(page) {
     tonight: dtzTonightPage,
     events: dtzEventsPage,
     "event-detail": dtzEventDetail,
+    "media-apply": dtzMediaApplyPage,
     feed: dtzFeedPage,
     inbox: dtzInboxPage,
     partners: dtzPartnersPage,
@@ -1981,18 +2103,8 @@ window.dtzAuthSignout = async function() {
 };
 
 async function initializeAuth() {
-  // Register the recovery listener BEFORE any asynchronous account lookup.
-  // Otherwise Supabase can process the email link before the listener exists.
-  supabase.auth.onAuthStateChange((event, session) => {
-    setAuthUser(session?.user || null);
-    if (event === "PASSWORD_RECOVERY") {
-      setTimeout(() => {
-        window.dtzResetPassword?.();
-      }, 100);
-    }
-  });
-
-  const { data, error } = await supabase.auth.getUser();
+  const { data, error } =
+    await supabase.auth.getUser();
 
   if (error && error.name !== "AuthSessionMissingError") {
     console.warn("Authentication:", error.message);
@@ -2017,8 +2129,18 @@ async function initializeAuth() {
     setAuthUser(null);
   }
 
+  supabase.auth.onAuthStateChange(
+    (event, session) => {
+      setAuthUser(session?.user || null);
+      if (event === "PASSWORD_RECOVERY") {
+        setTimeout(() => window.dtzResetPassword(), 0);
+      }   
+
+    }
+  );
+
   window.dtzAuthReady = true;
-}
+  }
 
 initializeAuth().catch(error => {
   console.error("Supabase initialization failed:", error);
