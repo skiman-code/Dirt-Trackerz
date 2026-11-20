@@ -346,6 +346,13 @@ a{color:var(--gold)}
   .mobilebar button.active{color:#ff6575}
   .pad{padding:15px}
 }
+/* Upgrade: sharper broadcast styling and accessible focus states */
+:root{--red:#dc142e;--gold:#edbd60}
+.btn,.tile,.card,.tab,.info,.sponsor,.dtz-presenting{border-radius:7px}
+.btn:focus-visible,.tile:focus-visible,.nav button:focus-visible,.field:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.dtz-hero{border-radius:8px}
+.dtz-hero h1{text-shadow:0 3px 12px #0009}
+@media(max-width:720px){.dtz-hero .btn{margin:4px 5px 4px 0}.topactions .btn{padding:8px 9px;font-size:12px}}
 </style>
 <style>
 .dtz-media-banner{background:linear-gradient(110deg,#6c0d20,#21171d 60%,#111318);border:1px solid #b58a42;padding:25px;margin:14px 0 20px;box-shadow:inset 0 2px #ffffff24}
@@ -554,7 +561,7 @@ const DTZ_TYPES = [
   ['track','Tracks & Promoters','Events, results, rainouts and broadcasts'],
   ['series','Racing Series','Schedules, standings and announcements'],
   ['media','Media Creators','Photography, videography and racing write-ups'],
-  ['stream','Streaming Partners','Broadcast schedules and official watch links'],
+  ['stream','Streaming Service Providers','Broadcast schedules and official watch links'],
   ['supplier','Suppliers','Racing manufacturers, products and services'],
   ['podcast','Podcasters','Episodes, shows and racing discussions'],
   ['announcer','Announcers','Event schedules, highlights and bookings']
@@ -659,23 +666,7 @@ function dtzHome(){
       <h2>WHAT'S HOT</h2>
       <span class="tag">COMMUNITY HIGHLIGHTS</span>
     </div>
-    <div class="dtz-photo-grid">
-      <div class="dtz-photo">
-        <strong>Trending Photos</strong>
-        <small>Featured racing photography</small>
-      </div>
-      <div class="dtz-photo">
-        <strong>Trending Drivers</strong>
-        <small>Follow the racing community</small>
-      </div>
-      <div class="dtz-photo">
-        <strong>Trending Events</strong>
-        <small>See what's happening at the track</small>
-      </div>
-    </div>
-    <p class="tiny muted">
-      Live trending rankings will appear when community activity tracking is connected.
-    </p>
+    <div class="info"><h3>Nationwide community spotlight</h3><p class="muted">The highest-ranking eligible photo, video, podcast or story will appear here when community posts and engagement tracking go live. Rankings will account for unusual or spam activity.</p><button class="btn gold small" onclick="go('feed')">Explore the Community Feed</button></div>
   </section>
 
   <div class="sponsor">
@@ -709,7 +700,7 @@ function dtzHome(){
       <span class="tag">RACING COMMUNITY</span>
     </div>
     <div class="tiles">
-      ${DTZ_TYPES.map(t=>`
+      ${DTZ_TYPES.filter(t=>!['podcast','announcer'].includes(t[0])).map(t=>`
         <button class="tile" onclick="dtzShowType('${t[0]}')">
           ${dtzIcon(DTZ_ICONS[t[0]])}
           <strong>${t[1]}</strong>
@@ -717,6 +708,7 @@ function dtzHome(){
         </button>
       `).join('')}
     </div>
+    <div class="info" style="margin-top:14px"><h3>More from Media</h3><div class="tabs"><button class="btn dark small" onclick="dtzShowType('podcast')">Podcasts</button><button class="btn dark small" onclick="dtzShowType('announcer')">Announcers</button></div></div>
   </section>
 
   <section class="card pad">
@@ -833,7 +825,7 @@ const DTZ_PROFILE_DETAILS = {
     ]
   },
   stream:{
-    title:'Streaming Partner Profile',
+    title:'Streaming Service Provider Profile',
     subtitle:'Official live racing coverage and broadcast schedules.',
     sections:[
       ['Streaming Schedule','Upcoming broadcasts and event details.'],
@@ -1010,7 +1002,7 @@ function dtzTracksPage() {
         <h2>Tracks You Follow</h2>
         <span class="tag">TOP 3</span>
       </div>
-      <p>Your three most recently followed tracks will appear here once following is connected.</p>
+      <p>Tracks saved on this device are shown below. Cross-device following will require account synchronization.</p>
       
 ${(() => {
   let followed = [];
@@ -1073,7 +1065,7 @@ function dtzFilterTracks(query) {
       </div>
 
       <div class="tiles">
-        ${DTZ_TYPES.map(type=>`
+        ${DTZ_TYPES.filter(type=>!['podcast','announcer'].includes(type[0])).map(type=>`
           <button class="tile"
             onclick="dtzShowType('${type[0]}')">
             ${dtzIcon(DTZ_ICONS[type[0]])}
@@ -1081,6 +1073,10 @@ function dtzFilterTracks(query) {
             <small>${dtzEscape(type[2])}</small>
           </button>
         `).join('')}
+      </div>
+      <div class="info" style="margin-top:14px">
+        <h3>Media specialties</h3>
+        <div class="tabs"><button class="btn dark small" onclick="dtzShowType('media')">Photographers & Videographers</button><button class="btn dark small" onclick="dtzShowType('podcast')">Podcasters</button><button class="btn dark small" onclick="dtzShowType('announcer')">Announcers</button></div>
       </div>
     </div>
   `;
@@ -1215,36 +1211,17 @@ function dtzShowEvent(id){
   go('event-detail');
 }
 
+let dtzEventsState='All States';
+function dtzEventsStateChange(value){dtzEventsState=value;go('events');}
 function dtzEventsPage(){
-  return `
-    <div class="eyebrow">RACING SCHEDULE</div>
-    <h1 class="heading">EVENTS & RESULTS</h1>
-
-    <div class="notice">
-      These are sample event cards. Official schedules,
-      race results and rainout information will be
-      connected to verified tracks.
-    </div>
-
-    <div class="tabs">
-      <button class="tab active">Arkansas</button>
-      <button class="tab">Texas</button>
-      <button class="tab">Louisiana</button>
-    </div>
-
-    ${DTZ_DEMO_EVENTS.map(dtzEventCard).join('')}
-
-    <div class="card pad">
-      <h2>Official Race Results</h2>
-      <p class="muted">
-        Feature winners, heat race results, driver profiles
-        and championship standings will appear here
-        after verified results are connected.
-      </p>
-    </div>
-  `;
+  return `<div class="eyebrow">RACING SCHEDULE</div><h1 class="heading">EVENTS & RESULTS</h1>
+    <div class="card pad"><label class="eyebrow" for="dtzEventsState">STATE</label>
+      <select id="dtzEventsState" class="field" onchange="dtzEventsStateChange(this.value)" style="margin-top:10px">
+      ${['All States','Arkansas','Louisiana','Texas',...DTZ_OTHER_STATES].map(x=>`<option ${x===dtzEventsState?'selected':''}>${dtzEscape(x)}</option>`).join('')}</select></div>
+    <div class="notice">Official events and results for ${dtzEscape(dtzEventsState)} will appear when approved tracks connect their schedules and scoring data. No sample events are presented as real races.</div>
+    <div class="card pad"><h2>Race Results</h2><p class="muted">Feature, heat and B-main results, every finishing position, and DQ status will be displayed after track verification.</p></div>
+    <div class="card pad"><h2>Media Credentials</h2><p class="muted">The credential application is currently a browser-only preview. Applications are not delivered to tracks until secure submission and approval are connected.</p><button class="btn dark small" onclick="dtzShowEvent(1)">View Sample Event & Credential Preview</button></div>`;
 }
-
 
 /* MEDIA CREDENTIAL APPLICATION — LOCAL PREVIEW ONLY
    Production requires authenticated Supabase records, verified media eligibility,
@@ -1357,7 +1334,7 @@ function dtzEventDetail(){
     </button>
 
     <div class="card pad" style="margin-top:15px">
-      <div class="eyebrow">EVENT DETAILS</div>
+      <div class="eyebrow">SAMPLE EVENT · NOT A CONFIRMED RACE</div>
       <h1>${dtzEscape(event.title)}</h1>
 
       <div class="twocol">
@@ -1394,7 +1371,7 @@ function dtzEventDetail(){
           <p>${dtzEscape(event.stream)}</p>
           <button class="btn gold small"
             onclick="dtzShowType('stream')">
-            Streaming Partners
+            Streaming Service Providers
           </button>
         </div>
 
@@ -1414,19 +1391,24 @@ function dtzEventDetail(){
 }
 
 function dtzTonightPage(){
+  const today = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
   return `
     <div class="eyebrow">TODAY'S RACING</div>
     <h1 class="heading">RACING TONIGHT</h1>
-
-    <div class="notice">
-      Only events scheduled for the current day will
-      appear here when live schedules are connected.
-      The examples below are not confirmed races.
+    <p class="muted">${dtzEscape(today)} · All States</p>
+    <div class="card pad">
+      <label for="dtzTonightState" class="eyebrow">FILTER BY STATE</label>
+      <select id="dtzTonightState" class="field" onchange="dtzTonightStateChange(this.value)" style="margin-top:10px">
+        ${['All States','Arkansas','Louisiana','Texas',...DTZ_OTHER_STATES].map(state=>`<option ${state===dtzTonightState?'selected':''}>${dtzEscape(state)}</option>`).join('')}
+      </select>
     </div>
-
-    ${DTZ_DEMO_EVENTS.map(dtzEventCard).join('')}
+    <div class="notice">No verified race schedule has been connected for ${dtzEscape(dtzTonightState)} today. This does not mean racing is canceled. Check each track's official channels before traveling.</div>
+    <div class="card pad"><h2>For track representatives</h2><p class="muted">Publish events, start times, racing classes, rainouts and official watch links once track management is connected and approved.</p><button class="btn gold small" onclick="dtzShowType('track')">Explore Track Profiles</button></div>
   `;
 }
+const DTZ_OTHER_STATES = ['Alabama','Alaska','Arizona','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+let dtzTonightState='All States';
+function dtzTonightStateChange(state){dtzTonightState=state;go('tonight');}
 
 function dtzFeedPage(){
   return `
