@@ -1690,6 +1690,12 @@ function dtzAccountView(view) {
         Sign In
       </button>
 
+      
+<button type="button" onclick="dtzForgotPassword()" style="background:none;border:0;color:#dfb45c;padding:8px 0;cursor:pointer;text-decoration:underline;">
+  Forgot Password?
+</button>
+
+
       <p class="tiny muted">
         New to Dirt Trackerz?
       </p>
@@ -1894,6 +1900,22 @@ window.dtzAuthSignin = async function(email, password) {
   window.closeModal?.();
 };
 
+window.dtzForgotPassword = async function () {
+  const emailField = document.getElementById("dtzSigninEmail");
+  const email = emailField?.value?.trim() || prompt("Enter the email address for your Dirt Trackerz account:");
+  if (!email) return;
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: siteURL
+  });
+
+  if (error) {
+    authMessage("Could not send reset email: " + getErrorMessage(error));
+    return;
+  }
+  authMessage("If an account exists for that email, a password-reset link has been sent. Check your inbox and spam folder.");
+};
+
 window.dtzResetPassword = async function () {
   const password = prompt("Enter your new Dirt Trackerz password (at least 10 characters):");
 
@@ -1988,9 +2010,9 @@ async function initializeAuth() {
   supabase.auth.onAuthStateChange(
     (event, session) => {
       setAuthUser(session?.user || null);
-   if (event === "PASSWORD_RECOVERY") {
-  window.dtzResetPassword();
-}   
+      if (event === "PASSWORD_RECOVERY") {
+        setTimeout(() => window.dtzResetPassword(), 0);
+      }   
 
     }
   );
