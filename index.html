@@ -1981,8 +1981,18 @@ window.dtzAuthSignout = async function() {
 };
 
 async function initializeAuth() {
-  const { data, error } =
-    await supabase.auth.getUser();
+  // Register the recovery listener BEFORE any asynchronous account lookup.
+  // Otherwise Supabase can process the email link before the listener exists.
+  supabase.auth.onAuthStateChange((event, session) => {
+    setAuthUser(session?.user || null);
+    if (event === "PASSWORD_RECOVERY") {
+      setTimeout(() => {
+        window.dtzResetPassword?.();
+      }, 100);
+    }
+  });
+
+  const { data, error } = await supabase.auth.getUser();
 
   if (error && error.name !== "AuthSessionMissingError") {
     console.warn("Authentication:", error.message);
@@ -2007,18 +2017,8 @@ async function initializeAuth() {
     setAuthUser(null);
   }
 
-  supabase.auth.onAuthStateChange(
-    (event, session) => {
-      setAuthUser(session?.user || null);
-      if (event === "PASSWORD_RECOVERY") {
-        setTimeout(() => window.dtzResetPassword(), 0);
-      }   
-
-    }
-  );
-
   window.dtzAuthReady = true;
-  }
+}
 
 initializeAuth().catch(error => {
   console.error("Supabase initialization failed:", error);
