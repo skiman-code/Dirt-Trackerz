@@ -547,6 +547,7 @@ const DTZ_ICONS = {
 const DTZ_NAV = [
   ['home','Home','home'],
   ['feed','Social Feed','feed'],
+  ['following-feed','Following Feed','feed'],
   ['tonight','Racing Tonight','tonight'],
   ['events','Events & Results','events'],
   ['profiles','Community','profiles'],
@@ -1582,45 +1583,75 @@ function dtzAdminPage(){
 let dtzCurrentUser = null;
 let dtzAuthReady = false;
 let dtzMemberProfile = null;
+let dtzProfileTab = "posts";
+let dtzOwnPosts = [];
+let dtzFollowing = [];
 function dtzMyProfilePage() {
   if (!dtzCurrentUser) return `<div class="card pad"><h2>Sign in to view your profile</h2><button class="btn gold" onclick="openModal('account')">Sign In</button></div>`;
-  const p = dtzMemberProfile;
-  if (!p) return `<div class="card pad"><h2>Loading your profile...</h2></div>`;
-  const type = DTZ_TYPES.find(t => t[0] === p.account_type);
-  return `<div class="card">
-    <div class="profilehero"><div class="eyebrow">MY DIRT TRACKERZ PROFILE</div>
-    <h1>${dtzEscape(p.display_name)}</h1>
-    <p>${dtzEscape(type?.[1] || p.account_type)} · @${dtzEscape(p.username)}</p></div>
+  const p=dtzMemberProfile;
+  if(!p) return `<div class="card pad"><h2>Complete your profile</h2><button class="btn gold" onclick="dtzEditMyProfile()">Complete Profile</button></div>`;
+  const type=DTZ_TYPES.find(t=>t[0]===p.account_type);
+  const avatar=p.avatar_url?`<img src="${dtzEscape(p.avatar_url)}" alt="Profile photo" style="width:100%;height:100%;object-fit:cover">`:dtzIcon("user-round");
+  const cover=p.cover_url?`background-image:linear-gradient(0deg,#090a0c77,#090a0c22),url('${dtzEscape(p.cover_url)}');background-size:cover;background-position:center;`:"background:linear-gradient(115deg,#650d20,#bd1734,#211217);";
+  let content="";
+  if(dtzProfileTab==="posts") content=`<div class="card pad"><h3>My Posts</h3><textarea id="dtzNewPost" class="field" rows="3" maxlength="3000" placeholder="Share your racing news..."></textarea><button class="btn gold" style="margin-top:10px" onclick="dtzPublishPost()">Publish Post</button></div>`+
+    (dtzOwnPosts.length?dtzOwnPosts.map(x=>`<div class="card pad"><p>${dtzEscape(x.body)}</p><p class="tiny muted">${dtzEscape(new Date(x.created_at).toLocaleString())}</p></div>`).join(""):`<div class="card pad muted">Your posts will appear here.</div>`);
+  if(dtzProfileTab==="photos") content=`<div class="card pad"><h3>My Photos</h3><p>Your profile and cover photos appear above. A full photo-post gallery will be added when media uploads for posts are enabled.</p></div>`;
+  if(dtzProfileTab==="following") content=`<div class="card pad"><h3>Following</h3>${dtzFollowing.length?dtzFollowing.map(x=>`<p>${dtzEscape(x.track_name)}</p>`).join(""):"You haven't followed any tracks yet."}<button class="btn dark" onclick="go('tracks')">Discover Tracks</button></div>`;
+  if(dtzProfileTab==="about") content=`<div class="card pad"><h3>About</h3><p>${dtzEscape(p.bio||"No biography added yet.")}</p><p>${dtzEscape([p.hometown,p.state].filter(Boolean).join(", "))}</p><p>Account type: ${dtzEscape(type?.[1]||p.account_type)}</p></div>`;
+  return `<div class="card" style="overflow:hidden">
+    <div style="height:210px;position:relative;${cover}">
+      <button class="btn dark small" style="position:absolute;right:14px;top:14px" onclick="dtzUploadProfileImage('cover')">Edit Cover Photo</button>
+    </div>
     <div class="profilebody">
-    <p><strong>Hometown:</strong> ${dtzEscape(p.hometown || "Not added")} ${dtzEscape(p.state || "")}</p>
-    <p>${dtzEscape(p.bio || "Welcome to Dirt Trackerz!")}</p>
-    <div class="tabs">
-      <button class="btn gold" onclick="dtzEditMyProfile()">Edit Profile</button>
-      <button class="btn dark" onclick="dtzSignOut()">Sign Out</button>
-    </div></div></div>`;
+      <div class="profilebar">
+        <button onclick="dtzUploadProfileImage('avatar')" title="Change profile picture" style="width:94px;height:94px;border:3px solid #edbd60;border-radius:50%;overflow:hidden;background:#292d34;color:white;padding:0;display:grid;place-items:center">${avatar}</button>
+        <div class="grow"><h1>${dtzEscape(p.display_name)}</h1><p class="muted">@${dtzEscape(p.username)} · ${dtzEscape(type?.[1]||p.account_type)}</p></div>
+        <button class="btn gold" onclick="dtzEditMyProfile()">Edit Profile</button>
+      </div>
+      <p class="tiny muted">Tap your profile picture to change it.</p>
+      <div class="tabs" style="margin-top:20px">${["posts","photos","following","about"].map(t=>`<button class="tab ${dtzProfileTab===t?"active":""}" onclick="dtzProfileTab='${t}';go('my-profile')">${t[0].toUpperCase()+t.slice(1)}</button>`).join("")}</div>
+    </div></div>${content}`;
 }
 function dtzEditMyProfile() {
-  if (!dtzCurrentUser) return;
-  openModal("account");
-  dtzAccountView("complete-profile");
-  const p = dtzMemberProfile;
-  if (!p) return;
-  for (const [id, value] of Object.entries({
-    dtzCompleteType:p.account_type, dtzCompleteName:p.display_name,
-    dtzCompleteUsername:p.username, dtzCompleteHometown:p.hometown,
-    dtzCompleteState:p.state, dtzCompleteBio:p.bio
-  })) {
-    const el=document.getElementById(id);
-    if(el) el.value=value || "";
+  if (!dtzCurrentUser) return openModal("account");
+  openModal("account");dtzAccountView("complete-profile");
+  const p=dtzMemberProfile;if(!p)return;
+  for(const [id,value] of Object.entries({dtzCompleteType:p.account_type,dtzCompleteName:p.display_name,dtzCompleteUsername:p.username,dtzCompleteHometown:p.hometown,dtzCompleteState:p.state,dtzCompleteBio:p.bio})){
+    const el=document.getElementById(id);if(el)el.value=value||"";
   }
 }
-window.dtzSetMemberProfile = function(profile) { dtzMemberProfile = profile; };
-
+window.dtzSetMemberProfile=function(profile){dtzMemberProfile=profile;};
+function dtzUploadProfileImage(kind) {
+  if(!dtzCurrentUser)return openModal("account");
+  const input=document.createElement("input");input.type="file";input.accept="image/jpeg,image/png,image/webp";
+  input.onchange=async()=>{
+    const file=input.files?.[0];if(!file)return;
+    if(file.size>5*1024*1024)return dtzNotify("Choose an image under 5 MB.");
+    if(!["image/jpeg","image/png","image/webp"].includes(file.type))return dtzNotify("Choose a JPG, PNG or WebP image.");
+    try {dtzNotify("Uploading image...");await window.dtzSaveProfileImage(kind,file);}
+    catch(e){dtzNotify(e.message||"Upload failed.");}
+  };input.click();
+}
+async function dtzPublishPost(){
+  const input=document.getElementById("dtzNewPost");const body=input?.value.trim();
+  if(!body)return dtzNotify("Write something before publishing.");
+  try{await window.dtzCreateMyPost(body);input.value="";dtzNotify("Post published.");}
+  catch(e){dtzNotify(e.message||"Post failed.");}
+}
+function dtzOpenFollowingFeed(){go("following-feed");window.dtzLoadFollowingFeed?.();}
+let dtzFeedFollowingPosts=[];
+function dtzFollowingFeedPage(){
+  return `<div class="eyebrow">DIRT TRACKERZ</div><h1 class="heading">FOLLOWING FEED</h1>
+  <p class="muted">Updates from tracks and community members you follow.</p>
+  ${dtzFeedFollowingPosts.length?dtzFeedFollowingPosts.map(x=>`<div class="card pad"><strong>${dtzEscape(x.author_name||"Member")}</strong><p>${dtzEscape(x.body)}</p></div>`).join(""):`<div class="card pad">No posts from followed members yet. Follow drivers, tracks and media to build your feed.</div>`}</div>`;
+}
 
 function go(page) {
   const pages = {
     home: dtzHome,
     "my-profile": dtzMyProfilePage,
+    "following-feed": dtzFollowingFeedPage,
     profiles: dtzProfilesPage,
     tracks: dtzTracksPage,
     "profile-detail": dtzProfileDetail,
@@ -1955,9 +1986,9 @@ function dtzUpdateAccountUI(user) {
     button.textContent = user ? "My Profile" : "Sign In / Join";
     button.onclick = () => {
       if (!dtzCurrentUser) return openModal("account");
-      if (dtzMemberProfile) return go("my-profile");
-      openModal("account");
-      dtzAccountView("complete-profile");
+      closeModal();
+      go("my-profile");
+      if (!dtzMemberProfile) dtzNotify("Your profile needs to be completed. Select Edit Profile to finish setting it up.");
     };
   }
 }
@@ -2031,7 +2062,7 @@ async function saveProfile(user, details) {
 async function routeToProfileIfNeeded(user) {
   if (!user) return;
   const { data: profile, error } = await supabase.from("profiles")
-    .select("id,username,display_name,account_type,hometown,state,bio")
+    .select("id,username,display_name,account_type,hometown,state,bio,avatar_url,cover_url")
     .eq("id", user.id).maybeSingle();
   if (error) {
     console.warn("Profile lookup:", error.message);
@@ -2048,6 +2079,7 @@ async function routeToProfileIfNeeded(user) {
   window.dtzSetMemberProfile?.(profile);
   window.closeModal?.();
   window.go?.("my-profile");
+  await window.dtzLoadMyProfileData?.();
 }
 
 window.dtzSaveCompletedProfile = async function(details) {
@@ -2205,6 +2237,51 @@ window.dtzSaveTrackFollow = async function(name) {
 };
 
 
+window.dtzSaveProfileImage=async function(kind,file){
+  const {data:{user},error:authError}=await supabase.auth.getUser();
+  if(authError||!user)throw Error("Please sign in.");
+  const ext={"image/jpeg":"jpg","image/png":"png","image/webp":"webp"}[file.type];
+  if(!ext)throw Error("Unsupported image type.");
+  const path=`${user.id}/${kind}-${crypto.randomUUID()}.${ext}`;
+  const {error:uploadError}=await supabase.storage.from("profile-images").upload(path,file,{contentType:file.type,upsert:false});
+  if(uploadError)throw Error(uploadError.message);
+  const {data:publicData}=supabase.storage.from("profile-images").getPublicUrl(path);
+  const field=kind==="cover"?"cover_url":"avatar_url";
+  const {error}=await supabase.from("profiles").update({[field]:publicData.publicUrl}).eq("id",user.id);
+  if(error)throw Error(error.message);
+  await routeToProfileIfNeeded(user);
+  authMessage("Photo updated!");
+};
+window.dtzCreateMyPost=async function(body){
+  const {data:{user}}=await supabase.auth.getUser();if(!user)throw Error("Please sign in.");
+  const {error}=await supabase.from("member_posts").insert({author_id:user.id,body});
+  if(error)throw Error(error.message);
+  await window.dtzLoadMyProfileData();
+};
+window.dtzLoadMyProfileData=async function(){
+  const {data:{user}}=await supabase.auth.getUser();if(!user)return;
+  const [posts,follows]=await Promise.all([
+    supabase.from("member_posts").select("id,body,created_at").eq("author_id",user.id).order("created_at",{ascending:false}).limit(50),
+    supabase.from("track_follows").select("track_name").eq("user_id",user.id).limit(100)
+  ]);
+  if(posts.error)console.warn("Posts:",posts.error.message);
+  if(follows.error)console.warn("Following:",follows.error.message);
+  dtzOwnPosts=posts.data||[];dtzFollowing=follows.data||[];
+  if(dtzPage==="my-profile")go("my-profile");
+};
+window.dtzLoadFollowingFeed=async function(){
+  const {data:{user}}=await supabase.auth.getUser();if(!user)return;
+  const {data:follows,error}=await supabase.from("member_follows").select("followed_id").eq("follower_id",user.id).limit(100);
+  if(error){console.warn(error.message);return;}
+  const ids=(follows||[]).map(x=>x.followed_id);
+  if(!ids.length){dtzFeedFollowingPosts=[];go("following-feed");return;}
+  const {data:posts,error:postsError}=await supabase.from("member_posts").select("body,author_id,created_at").in("author_id",ids).order("created_at",{ascending:false}).limit(50);
+  if(postsError){console.warn(postsError.message);return;}
+  const {data:names}=await supabase.from("profiles").select("id,display_name").in("id",ids);
+  const lookup=Object.fromEntries((names||[]).map(x=>[x.id,x.display_name]));
+  dtzFeedFollowingPosts=(posts||[]).map(x=>({...x,author_name:lookup[x.author_id]||"Member"}));
+  go("following-feed");
+};
 window.dtzAuthSignout = async function() {
   const { error } = await supabase.auth.signOut();
 
