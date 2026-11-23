@@ -405,6 +405,9 @@ a{color:var(--gold)}
 <style>
 .dtz-discovery-head{border:5px ridge #d9a94b;background:linear-gradient(115deg,#7b081e,#1a1117);padding:22px;margin-bottom:17px;box-shadow:0 3px 15px #000a}.dtz-discovery-head h1{font-size:clamp(25px,5vw,43px);margin:4px 0;font-style:italic}.dtz-find{width:100%;padding:16px;background:#090a0d;border:4px ridge #d7a44a;color:white;font-size:17px}.dtz-person{display:flex;align-items:center;gap:14px;border:3px ridge #c99b48;background:linear-gradient(120deg,#610a1c,#1b1c20 65%);padding:16px;margin:12px 0;flex-wrap:wrap}.dtz-person .dtz-person-avatar{width:60px;height:60px;flex:none;border:3px solid #d9b057;border-radius:50%;object-fit:cover;background:#272a2e;display:grid;place-items:center}.dtz-person-actions{display:flex;gap:7px;flex-wrap:wrap}.dtz-filter{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.dtz-filter button.active{background:linear-gradient(#c51c37,#680b1d);border-color:#e6b04d}.dtz-post-photo{max-width:100%;max-height:450px;object-fit:contain;border:1px solid #a37c3c;margin-top:12px}.dtz-status{color:#efc66f;margin:12px 0}
 </style>
+<style>
+.dtz-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:14px}.dtz-action{min-height:77px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:2px solid #a78043;border-radius:4px;background:linear-gradient(#35363b,#0b0c0e 45%,#22242a);color:#f6f2e9;box-shadow:inset 0 1px #fff5,0 3px 9px #0008;padding:6px 2px}.dtz-action:hover{filter:brightness(1.18)}.dtz-action.selected{border-color:#ffd778;background:linear-gradient(#9d1930,#410815)}.dtz-action svg{height:39px;width:48px}.dtz-action .dtz-count{font-size:11px;color:#f4c76e;font-weight:800}.dtz-action .dtz-caption{font-size:10px;letter-spacing:.2px;font-weight:900}.dtz-post-meta{font-size:12px;color:#aaa;margin-top:5px}.dtz-comments{margin-top:14px;border-top:1px solid #6c512e;padding-top:12px}.dtz-comment{padding:10px 0;border-bottom:1px solid #383b40}.dtz-comment strong{color:#edbd60}.dtz-post-link{background:transparent;border:0;color:#f3c96e;text-decoration:underline;cursor:pointer;padding:0}.dtz-share-note{border-left:3px solid #e4b452;padding-left:12px;color:#d2c6b5;margin:12px 0}.dtz-action:focus-visible{outline:2px solid #fff;outline-offset:2px}
+</style>
 </head>
 <body>
 
@@ -1449,40 +1452,14 @@ const DTZ_OTHER_STATES = ['Alabama','Alaska','Arizona','California','Colorado','
 let dtzTonightState='All States';
 function dtzTonightStateChange(state){dtzTonightState=state;go('tonight');}
 
+let dtzCommunityPosts=[];
+let dtzFeedError='';
 function dtzFeedPage(){
-  return `
-    <div class="eyebrow">DIRT TRACKERZ COMMUNITY</div>
-    <h1 class="heading">SOCIAL FEED</h1>
-
-    <div class="card pad">
-      <div class="tabs">
-        <button class="tab active">Following</button>
-        <button class="tab">What's in the News</button>
-      </div>
-
-      <div class="notice">
-        Live community posts will appear here after
-        posting, following and moderation are connected.
-      </div>
-
-      <h2>Community Updates</h2>
-      <p class="muted">
-        Drivers, tracks, media creators, racing series,
-        announcers and streaming partners will be able
-        to share racing updates and write-ups.
-      </p>
-    </div>
-
-    <div class="card pad">
-      <h2>Fan Reactions</h2>
-      <p class="muted">
-        Checkered Flag and Black Flag reactions,
-        along with approved racing comments,
-        will be available when community interaction
-        features are activated.
-      </p>
-    </div>
-  `;
+ return `<div class="eyebrow">DIRT TRACKERZ COMMUNITY</div><h1 class="heading">SOCIAL FEED</h1>
+ <div class="tabs"><button class="btn gold" onclick="go('feed')">All Community Posts</button><button class="btn dark" onclick="go('following-feed')">Following Feed</button></div>
+ <div class="card pad"><button class="btn gold small" onclick="go('my-profile');dtzProfileTab='posts';go('my-profile')">Create a Post</button> <button class="btn dark small" onclick="window.dtzLoadCommunityFeed()">Refresh Feed</button></div>
+ ${dtzFeedError?`<div class="notice">${dtzEscape(dtzFeedError)}</div>`:''}
+ ${dtzCommunityPosts.length?dtzCommunityPosts.map(dtzRenderPost).join(''):`<div class="card pad muted">No community posts to display yet.</div>`}`;
 }
 
 function dtzInboxPage(){
@@ -1633,7 +1610,7 @@ function dtzMyProfilePage() {
   const cover=p.cover_url?`background-image:linear-gradient(0deg,#090a0c77,#090a0c22),url('${dtzEscape(p.cover_url)}');`:"";
   let content="";
   if(dtzProfileTab==="posts") content=`<div class="card pad"><h3>My Posts</h3><textarea id="dtzNewPost" class="field" rows="3" maxlength="3000" placeholder="Share your racing news..."></textarea><input id="dtzPostImage" type="file" accept="image/jpeg,image/png,image/webp" class="field" style="margin-top:10px"><button class="btn gold" style="margin-top:10px" onclick="dtzPublishPost()">Publish Post</button></div>`+
-    (dtzOwnPosts.length?dtzOwnPosts.map(x=>`<div class="card pad"><p style="white-space:pre-wrap">${dtzEscape(x.body)}</p>${x.image_url?`<img class="dtz-post-photo" src="${dtzEscape(x.image_url)}" alt="Post photo">`:''}<p class="tiny muted">${dtzEscape(new Date(x.created_at).toLocaleString())}</p></div>`).join(""):`<div class="card pad muted">Your posts will appear here.</div>`);
+    (dtzOwnPosts.length?dtzOwnPosts.map(dtzRenderPost).join(""):`<div class="card pad muted">Your posts will appear here.</div>`);
   if(dtzProfileTab==="photos") content=`<div class="card pad"><h3>My Photos</h3><p>Change your profile and cover photos above. Photo galleries for posts are coming in a later update.</p></div>`;
   if(dtzProfileTab==="following") content=`<div class="card pad"><h3>Following</h3>${dtzFollowing.length?dtzFollowing.map(x=>`<p>${dtzEscape(x.track_name)}</p>`).join(""):"You haven't followed any tracks yet."}<button class="btn dark" onclick="go('tracks')">Discover Tracks</button> <button class="btn gold" onclick="dtzOpenFollowingFeed()">Following Feed</button></div>`;
   if(dtzProfileTab==="about") content=`<div class="card pad"><h3>About Me</h3><p>${dtzEscape(p.bio||"No biography added yet.")}</p><p>${dtzEscape([p.hometown,p.state].filter(Boolean).join(", "))}</p><p>Account type: ${dtzEscape(type?.[1]||p.account_type)}</p></div>`;
@@ -1700,15 +1677,46 @@ function dtzRenderPeopleResults(){if(dtzPage!=='people')return;const el=document
 function dtzOpenMember(id){dtzViewedPerson=dtzPeople.find(p=>p.id===id);if(dtzViewedPerson){go('member');window.dtzLoadMemberPosts?.(id);}}
 let dtzMemberPosts=[];
 function dtzMemberPage(){const p=dtzViewedPerson;if(!p)return dtzPeoplePage();return `<button class="btn dark small" onclick="go('people')">Back to People I Know</button><div class="dtz-metal-profile" style="margin-top:14px"><div class="dtz-metal-cover" style="${p.cover_url?`background-image:url('${dtzEscape(p.cover_url)}')`:''}"></div><div class="dtz-metal-identity"><h1>${dtzEscape(p.display_name||p.username||'Member')}</h1><p>@${dtzEscape(p.username||'member')} · ${dtzEscape(p.account_type||'fan')}</p><p>${dtzEscape(p.bio||'')}</p><button class="btn gold" onclick="dtzToggleMemberFollow('${p.id}')">${dtzFollowedIds.has(p.id)?'Following':'+ Follow'}</button></div></div><h2>Posts</h2>${dtzMemberPosts.length?dtzMemberPosts.map(dtzRenderPost).join(''):'<div class="card pad">No posts yet.</div>'}`;}
-function dtzRenderPost(p){return `<article class="card pad"><strong>${dtzEscape(p.author_name||'Member')}</strong><p style="white-space:pre-wrap">${dtzEscape(p.body)}</p>${p.image_url?`<img class="dtz-post-photo" src="${dtzEscape(p.image_url)}" alt="Post photo" loading="lazy">`:''}<p class="tiny muted">${dtzEscape(new Date(p.created_at).toLocaleString())}</p></article>`;}
+function dtzFlagSvg(checkered){
+ const squares=Array.from({length:16},(_,i)=>`<rect x="${16+(i%4)*9}" y="${9+Math.floor(i/4)*9}" width="9" height="9" fill="${(Math.floor(i/4)+i%4)%2?'#101114':'#fff'}"/>`).join('');
+ return `<svg viewBox="0 0 64 60" aria-hidden="true"><path d="M11 4v52" stroke="#e8b85b" stroke-width="4" stroke-linecap="round"/>${checkered?squares:'<path d="M16 9Q26 5 36 9T52 9V45Q42 49 33 45T16 45Z" fill="#050505" stroke="#8c9099" stroke-width="2"/>'}</svg>`;
+}
+const dtzPostUI={};
+function dtzRenderPost(p){
+ const id=String(p.id||'');if(!id)return '';
+ const stats=dtzPostUI[id]||{checkered:0,black:0,comments:0,shares:0,mine:null};
+ const safeId=dtzEscape(id);
+ return `<article class="card pad" id="dtz-post-${safeId}">
+ <strong>${dtzEscape(p.author_name||'Member')}</strong><div class="dtz-post-meta">${dtzEscape(new Date(p.created_at).toLocaleString())}</div>
+ ${p.shared_post_id?`<p class="dtz-share-note">Shared a community post</p>`:''}
+ <p style="white-space:pre-wrap;overflow-wrap:anywhere">${dtzEscape(p.body)}</p>
+ ${p.image_url?`<img class="dtz-post-photo" src="${dtzEscape(p.image_url)}" alt="Post photo" loading="lazy">`:''}
+ ${p.shared_post_id?`<button class="dtz-post-link" onclick="dtzViewOriginal('${safeId}')">View original post</button>`:''}
+ <div class="dtz-actions">
+ <button class="dtz-action ${stats.mine==='checkered'?'selected':''}" aria-label="Checkered flag like" aria-pressed="${stats.mine==='checkered'}" onclick="dtzReact('${safeId}','checkered')">${dtzFlagSvg(true)}<span class="dtz-count">${stats.checkered}</span></button>
+ <button class="dtz-action ${stats.mine==='black'?'selected':''}" aria-label="Black flag dislike" aria-pressed="${stats.mine==='black'}" onclick="dtzReact('${safeId}','black')">${dtzFlagSvg(false)}<span class="dtz-count">${stats.black}</span></button>
+ <button class="dtz-action" onclick="dtzToggleComments('${safeId}')"><span style="font-size:33px;line-height:1;color:#e9bd69">◯</span><span class="dtz-caption">SAY SOMETHING</span><span class="dtz-count">${stats.comments}</span></button>
+ <button class="dtz-action" onclick="dtzSharePost('${safeId}')"><span style="font-size:35px;line-height:1;color:#e9bd69">↗</span><span class="dtz-caption">SHARE</span><span class="dtz-count">${stats.shares}</span></button>
+ </div><div id="dtz-comments-${safeId}" class="dtz-comments" hidden></div></article>`;
+}
+function dtzToggleComments(id){const el=document.getElementById('dtz-comments-'+id);if(!el)return;el.hidden=!el.hidden;if(!el.hidden)window.dtzLoadComments?.(id);}
+function dtzReact(id,flag){window.dtzSaveReaction?.(id,flag);}
+function dtzSharePost(id){window.dtzSaveShare?.(id);}
+function dtzViewOriginal(id){window.dtzShowOriginal?.(id);}
+function dtzSubmitComment(id){const el=document.getElementById('dtz-comment-input-'+id);if(el?.value.trim())window.dtzSaveComment?.(id,el.value.trim());}
+function dtzUpdatePostCards(){document.querySelectorAll('[id^="dtz-post-"]').forEach(el=>{const id=el.id.slice(9),post=dtzCommunityPosts.concat(dtzFeedFollowingPosts,dtzOwnPosts,dtzMemberPosts).find(x=>x.id===id);if(post){const temp=document.createElement('div');temp.innerHTML=dtzRenderPost(post);const fresh=temp.firstElementChild;const oldComments=el.querySelector('.dtz-comments');const newComments=fresh.querySelector('.dtz-comments');if(oldComments&&newComments)newComments.replaceWith(oldComments);el.replaceWith(fresh);}});}
+
 function dtzChoosePostPhoto(){const input=document.getElementById('dtzPostImage');input?.click();}
 async function dtzPublishPost(){const input=document.getElementById('dtzNewPost'),body=input?.value.trim(),file=document.getElementById('dtzPostImage')?.files?.[0];if(!body&&!file)return dtzNotify('Write something or attach a photo.');try{await window.dtzCreateMyPost(body,file);dtzNotify('Post published.');}catch(e){dtzNotify(e.message||'Post failed.');}}
-function dtzOpenFollowingFeed(){go("following-feed");window.dtzLoadFollowingFeed?.();}
+function dtzOpenFollowingFeed(){go("following-feed");}
 let dtzFeedFollowingPosts=[];
+let dtzFollowingError="";
 function dtzFollowingFeedPage(){
   return `<div class="eyebrow">DIRT TRACKERZ</div><h1 class="heading">FOLLOWING FEED</h1>
   <p class="muted">Updates from tracks and community members you follow.</p>
-  ${dtzFeedFollowingPosts.length?dtzFeedFollowingPosts.map(x=>`<div class="card pad"><strong>${dtzEscape(x.author_name||"Member")}</strong><p>${dtzEscape(x.body)}</p>${x.image_url?`<img class="dtz-post-photo" src="${dtzEscape(x.image_url)}" alt="Post photo">`:''}</div>`).join(""):`<div class="card pad">No posts from followed members yet. Follow drivers, tracks and media to build your feed.</div>`}</div>`;
+  ${dtzFollowingError?`<div class="notice">${dtzEscape(dtzFollowingError)}</div>`:""}
+  ${dtzFeedFollowingPosts.length?dtzFeedFollowingPosts.map(dtzRenderPost).join(""):`<div class="card pad">No posts from followed members yet. Follow drivers, tracks and media to build your feed.</div>`}`;
+
 }
 
 function go(page) {
@@ -1740,6 +1748,8 @@ function go(page) {
 
   dtzRenderNavigation();
   if(page==='people')window.dtzLoadPeople?.();
+  if(page==='feed')window.dtzLoadCommunityFeed?.();
+  if(page==='following-feed')window.dtzLoadFollowingFeed?.();
   window.scrollTo(0, 0);
 }
 
@@ -2338,30 +2348,104 @@ window.dtzToggleMemberFollow=async function(id){
  if(exists)dtzFollowedIds.delete(id);else dtzFollowedIds.add(id);
  if(dtzPage==='member')go('member');else dtzRenderPeopleResults();
 };
-window.dtzLoadMemberPosts=async function(id){const {data,error}=await supabase.from('member_posts').select('id,body,image_url,created_at').eq('author_id',id).order('created_at',{ascending:false}).limit(50);if(error)return dtzNotify(error.message);dtzMemberPosts=(data||[]).map(x=>({...x,author_name:dtzViewedPerson?.display_name}));if(dtzPage==='member')go('member');};
+window.dtzLoadMemberPosts=async function(id){const {data,error}=await supabase.from('member_posts').select('id,body,image_url,created_at').eq('author_id',id).order('created_at',{ascending:false}).limit(50);if(error)return dtzNotify(error.message);dtzMemberPosts=(data||[]).map(x=>({...x,author_name:dtzViewedPerson?.display_name}));if(dtzPage==='member')go('member');window.dtzLoadPostStats?.(dtzMemberPosts);};
 window.dtzLoadMyProfileData=async function(){
   const {data:{user}}=await supabase.auth.getUser();if(!user)return;
   const [posts,follows]=await Promise.all([
-    supabase.from("member_posts").select("id,body,image_url,created_at").eq("author_id",user.id).order("created_at",{ascending:false}).limit(50),
+    supabase.from("member_posts").select("id,body,image_url,author_id,shared_post_id,created_at").eq("author_id",user.id).order("created_at",{ascending:false}).limit(50),
     supabase.from("track_follows").select("track_name").eq("user_id",user.id).limit(100)
   ]);
   if(posts.error)console.warn("Posts:",posts.error.message);
   if(follows.error)console.warn("Following:",follows.error.message);
   dtzOwnPosts=posts.data||[];dtzFollowing=follows.data||[];
   if(dtzPage==="my-profile")go("my-profile");
+ window.dtzLoadPostStats?.(dtzOwnPosts);
+};
+window.dtzLoadCommunityFeed=async function(){
+ const {data:posts,error}=await supabase.from("member_posts").select("id,body,image_url,author_id,shared_post_id,created_at").order("created_at",{ascending:false}).limit(75);
+ if(error){dtzFeedError=error.message;dtzCommunityPosts=[];}
+ else {
+   const ids=[...new Set((posts||[]).map(p=>p.author_id))];
+   let names=[];
+   if(ids.length){const r=await supabase.from("profiles").select("id,display_name,username").in("id",ids);if(r.error)dtzFeedError="Unable to load author names: "+r.error.message;else {names=r.data||[];dtzFeedError="";}}
+   else dtzFeedError="";
+   const lookup=Object.fromEntries(names.map(x=>[x.id,x.display_name||x.username||"Member"]));
+   dtzCommunityPosts=(posts||[]).map(x=>({...x,author_name:lookup[x.author_id]||"Member"}));
+ }
+ if(dtzPage==="feed")document.getElementById("main").innerHTML=dtzFeedPage();
+ window.dtzLoadPostStats?.(dtzCommunityPosts);
 };
 window.dtzLoadFollowingFeed=async function(){
   const {data:{user}}=await supabase.auth.getUser();if(!user)return;
   const {data:follows,error}=await supabase.from("member_follows").select("followed_id").eq("follower_id",user.id).limit(100);
-  if(error){console.warn(error.message);return;}
+  if(error){dtzFollowingError=error.message;if(dtzPage==="following-feed")document.getElementById("main").innerHTML=dtzFollowingFeedPage();return;}
   const ids=(follows||[]).map(x=>x.followed_id);
-  if(!ids.length){dtzFeedFollowingPosts=[];go("following-feed");return;}
-  const {data:posts,error:postsError}=await supabase.from("member_posts").select("body,image_url,author_id,created_at").in("author_id",ids).order("created_at",{ascending:false}).limit(50);
-  if(postsError){console.warn(postsError.message);return;}
+  if(!ids.length){dtzFeedFollowingPosts=[];dtzFollowingError="";if(dtzPage==="following-feed")document.getElementById("main").innerHTML=dtzFollowingFeedPage();return;}
+  const {data:posts,error:postsError}=await supabase.from("member_posts").select("id,body,image_url,author_id,shared_post_id,created_at").in("author_id",ids).order("created_at",{ascending:false}).limit(50);
+  if(postsError){dtzFollowingError=postsError.message;if(dtzPage==="following-feed")document.getElementById("main").innerHTML=dtzFollowingFeedPage();return;}
   const {data:names}=await supabase.from("profiles").select("id,display_name").in("id",ids);
   const lookup=Object.fromEntries((names||[]).map(x=>[x.id,x.display_name]));
   dtzFeedFollowingPosts=(posts||[]).map(x=>({...x,author_name:lookup[x.author_id]||"Member"}));
-  go("following-feed");
+  dtzFollowingError="";
+  if(dtzPage==="following-feed")document.getElementById("main").innerHTML=dtzFollowingFeedPage();
+ window.dtzLoadPostStats?.(dtzFeedFollowingPosts);
+};
+
+// All community interactions are persisted in Supabase with user-scoped RLS.
+window.dtzLoadPostStats=async function(posts){
+ const ids=[...new Set((posts||[]).map(p=>p.id).filter(Boolean))];if(!ids.length)return;
+ const [r,c,sh,auth]=await Promise.all([
+ supabase.from('post_reactions').select('post_id,user_id,reaction').in('post_id',ids),
+ supabase.from('post_comments').select('post_id').in('post_id',ids),
+ supabase.from('member_posts').select('shared_post_id').in('shared_post_id',ids),
+ supabase.auth.getUser()]);
+ if(r.error||c.error||sh.error){console.warn('Post interaction read failed',r.error||c.error||sh.error);return;}
+ const uid=auth.data.user?.id;
+ for(const id of ids)dtzPostUI[id]={checkered:0,black:0,comments:0,shares:0,mine:null};
+ for(const x of r.data||[]){const t=dtzPostUI[x.post_id];if(t){t[x.reaction]=(t[x.reaction]||0)+1;if(x.user_id===uid)t.mine=x.reaction;}}
+ for(const x of c.data||[]){if(dtzPostUI[x.post_id])dtzPostUI[x.post_id].comments++;}
+ for(const x of sh.data||[]){if(dtzPostUI[x.shared_post_id])dtzPostUI[x.shared_post_id].shares++;}
+ dtzUpdatePostCards();
+};
+window.dtzSaveReaction=async function(id,flag){
+ const {data:{user}}=await supabase.auth.getUser();if(!user)return openModal('account');
+ const mine=dtzPostUI[id]?.mine;
+ const q=mine===flag?supabase.from('post_reactions').delete().eq('post_id',id).eq('user_id',user.id):supabase.from('post_reactions').upsert({post_id:id,user_id:user.id,reaction:flag},{onConflict:'post_id,user_id'});
+ const {error}=await q;if(error)return dtzNotify(error.message);
+ await window.dtzLoadPostStats(dtzCommunityPosts.concat(dtzFeedFollowingPosts,dtzOwnPosts,dtzMemberPosts));
+};
+window.dtzLoadComments=async function(id){
+ const el=document.getElementById('dtz-comments-'+id);if(!el)return;
+ const {data,error}=await supabase.from('post_comments').select('id,author_id,body,created_at').eq('post_id',id).order('created_at',{ascending:true}).limit(100);
+ if(error){el.textContent=error.message;return;}
+ const ids=[...new Set((data||[]).map(x=>x.author_id))];let names=[];
+ if(ids.length){const r=await supabase.from('profiles').select('id,display_name,username').in('id',ids);names=r.data||[];}
+ const map=Object.fromEntries(names.map(x=>[x.id,x.display_name||x.username||'Member']));
+ el.innerHTML=(data||[]).map(x=>`<div class="dtz-comment"><strong>${dtzEscape(map[x.author_id]||'Member')}</strong><p style="white-space:pre-wrap">${dtzEscape(x.body)}</p></div>`).join('')+`<textarea id="dtz-comment-input-${dtzEscape(id)}" class="field" maxlength="1500" rows="2" placeholder="Say something about this post..."></textarea><button class="btn gold small" style="margin-top:8px" onclick="dtzSubmitComment('${dtzEscape(id)}')">Post Comment</button>`;
+};
+window.dtzSaveComment=async function(id,body){
+ const {data:{user}}=await supabase.auth.getUser();if(!user)return openModal('account');
+ const {error}=await supabase.from('post_comments').insert({post_id:id,author_id:user.id,body});if(error)return dtzNotify(error.message);
+ await window.dtzLoadComments(id);await window.dtzLoadPostStats(dtzCommunityPosts.concat(dtzFeedFollowingPosts,dtzOwnPosts,dtzMemberPosts));
+};
+window.dtzSaveShare=async function(id){
+ const {data:{user}}=await supabase.auth.getUser();if(!user)return openModal('account');
+ const {data:original,error:readError}=await supabase.from('member_posts').select('id,author_id,body,image_url').eq('id',id).single();
+ if(readError)return dtzNotify(readError.message);
+ if(original.author_id===user.id)return dtzNotify('You cannot share your own post to your page again.');
+ const {data:author}=await supabase.from('profiles').select('display_name,username').eq('id',original.author_id).maybeSingle();
+ const label=author?.display_name||author?.username||'a member';
+ const {error}=await supabase.from('member_posts').insert({author_id:user.id,shared_post_id:id,body:`Shared from ${label}:\n\n${original.body}`,image_url:original.image_url});
+ if(error)return dtzNotify(error.message);
+ dtzNotify('Shared to your profile!');await window.dtzLoadMyProfileData();
+ if(dtzPage==='feed')await window.dtzLoadCommunityFeed();
+};
+window.dtzShowOriginal=async function(id){
+ const share=dtzCommunityPosts.concat(dtzFeedFollowingPosts,dtzOwnPosts,dtzMemberPosts).find(x=>x.id===id);
+ if(!share?.shared_post_id)return;
+ const {data,error}=await supabase.from('member_posts').select('id,body,image_url,created_at,author_id,shared_post_id').eq('id',share.shared_post_id).maybeSingle();
+ if(error||!data)return dtzNotify('Original post is unavailable.');
+ dtzCommunityPosts=[data];dtzFeedError='';go('feed');
 };
 window.dtzAuthSignout = async function() {
   const { error } = await supabase.auth.signOut();
