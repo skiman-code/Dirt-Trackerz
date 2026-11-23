@@ -353,6 +353,20 @@ a{color:var(--gold)}
 .dtz-hero{border-radius:8px}
 .dtz-hero h1{text-shadow:0 3px 12px #0009}
 @media(max-width:720px){.dtz-hero .btn{margin:4px 5px 4px 0}.topactions .btn{padding:8px 9px;font-size:12px}}
+.dtz-my-photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.dtz-my-photo-tile{border:1px solid #a98242;padding:0;background:#15171b;aspect-ratio:1;overflow:hidden;cursor:pointer}
+.dtz-my-photo-tile img{width:100%;height:100%;object-fit:cover;display:block}
+.dtz-crop-overlay{position:fixed;inset:0;z-index:99999;background:#000d;display:flex;align-items:center;justify-content:center;padding:12px}
+.dtz-crop-dialog{width:min(95vw,680px);max-height:95vh;overflow:auto;background:#17191d;border:2px solid #b48d4c;padding:20px;color:#fff;box-shadow:0 12px 55px #000}
+.dtz-crop-dialog h2{margin:0 0 8px}.dtz-crop-dialog p{color:#c7c8cc}
+.dtz-crop-viewport{margin:12px auto;background:#0b0b0b;overflow:hidden;touch-action:none;cursor:grab;border:1px solid #8e794d}
+.dtz-crop-viewport:active{cursor:grabbing}
+.dtz-crop-viewport.square{width:min(100%,350px);aspect-ratio:1}
+.dtz-crop-viewport.wide{width:100%;aspect-ratio:20/7}
+.dtz-crop-viewport canvas{width:100%;height:100%;display:block}
+#dtzCropZoom{display:block;width:100%;margin:12px 0 20px}
+.dtz-crop-actions{display:flex;justify-content:flex-end;gap:10px}
+@media(max-width:600px){.dtz-my-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 <style>
 .dtz-media-banner{background:linear-gradient(110deg,#6c0d20,#21171d 60%,#111318);border:1px solid #b58a42;padding:25px;margin:14px 0 20px;box-shadow:inset 0 2px #ffffff24}
@@ -1600,6 +1614,9 @@ let dtzAuthReady = false;
 let dtzMemberProfile = null;
 let dtzProfileTab = "posts";
 let dtzOwnPosts = [];
+let dtzMyRecentPhotos = [];
+function dtzPhotoIsCurrent(p){const t=Date.parse(p?.created_at||"");return Number.isFinite(t)&&t>Date.now()-30*86400000;}
+function dtzPhotoIsVisible(p){return !!p?.image_url && dtzPhotoIsCurrent(p) && !p.media_expired_at;}
 let dtzFollowing = [];
 function dtzMyProfilePage() {
   if (!dtzCurrentUser) return `<div class="card pad"><h2>Sign in to view your profile</h2><button class="btn gold" onclick="openModal('account')">Sign In</button></div>`;
@@ -1611,7 +1628,7 @@ function dtzMyProfilePage() {
   let content="";
   if(dtzProfileTab==="posts") content=`<div class="card pad"><h3>My Posts</h3><textarea id="dtzNewPost" class="field" rows="3" maxlength="3000" placeholder="Share your racing news..."></textarea><input id="dtzPostImage" type="file" accept="image/jpeg,image/png,image/webp" class="field" style="margin-top:10px"><button class="btn gold" style="margin-top:10px" onclick="dtzPublishPost()">Publish Post</button></div>`+
     (dtzOwnPosts.length?dtzOwnPosts.map(dtzRenderPost).join(""):`<div class="card pad muted">Your posts will appear here.</div>`);
-  if(dtzProfileTab==="photos") content=`<div class="card pad"><h3>My Photos</h3><p>Change your profile and cover photos above. Photo galleries for posts are coming in a later update.</p></div>`;
+  if(dtzProfileTab==="photos") content=`<div class="card pad"><h3>My Photos</h3><p class="muted">Photographs from your posts during the last 30 days. Profile and cover photos stay until you replace them.</p><div class="dtz-my-photo-grid">${dtzMyRecentPhotos.filter(dtzPhotoIsVisible).map(p=>`<button class="dtz-my-photo-tile" onclick="dtzOpenMyPhotoPost('${dtzEscape(p.id)}')" aria-label="View photo post"><img src="${dtzEscape(p.image_url)}" alt="Your racing photograph" loading="lazy"></button>`).join("")}</div>${!dtzMyRecentPhotos.some(dtzPhotoIsVisible)?'<p class="muted">No photographs from the last 30 days.</p>':''}</div>`;
   if(dtzProfileTab==="following") content=`<div class="card pad"><h3>Following</h3>${dtzFollowing.length?dtzFollowing.map(x=>`<p>${dtzEscape(x.track_name)}</p>`).join(""):"You haven't followed any tracks yet."}<button class="btn dark" onclick="go('tracks')">Discover Tracks</button> <button class="btn gold" onclick="dtzOpenFollowingFeed()">Following Feed</button></div>`;
   if(dtzProfileTab==="about") content=`<div class="card pad"><h3>About Me</h3><p>${dtzEscape(p.bio||"No biography added yet.")}</p><p>${dtzEscape([p.hometown,p.state].filter(Boolean).join(", "))}</p><p>Account type: ${dtzEscape(type?.[1]||p.account_type)}</p></div>`;
   const nav=[["posts","MY POSTS","Your personal racing updates","feed"],["photos","MY PHOTOS","Your racing photo gallery","media"],["following","FOLLOWING","Drivers, tracks and media you follow","profiles"],["about","ABOUT ME","Your racing information and biography","fan"]];
@@ -1638,6 +1655,13 @@ function dtzMyProfilePage() {
   </section>`;
 }
 
+function dtzOpenMyPhotoPost(id){
+  const post=dtzMyRecentPhotos.find(p=>p.id===id);
+  if(!post)return;
+  const root=document.getElementById("modalroot");
+  root.innerHTML=`<div class="modalbg" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:780px"><div class="modalhead"><h2>My Photo</h2><button class="close" onclick="closeModal()" aria-label="Close">×</button></div>${dtzRenderPost({...post,author_name:dtzMemberProfile?.display_name})}</div></div>`;
+  window.dtzLoadPostStats?.([post]);
+}
 function dtzEditMyProfile() {
   if (!dtzCurrentUser) return openModal("account");
   openModal("account");dtzAccountView("complete-profile");
@@ -1650,13 +1674,75 @@ window.dtzSetMemberProfile=function(profile){dtzMemberProfile=profile;};
 function dtzUploadProfileImage(kind) {
   if(!dtzCurrentUser)return openModal("account");
   const input=document.createElement("input");input.type="file";input.accept="image/jpeg,image/png,image/webp";
-  input.onchange=async()=>{
+  input.onchange=()=>{
     const file=input.files?.[0];if(!file)return;
-    if(file.size>5*1024*1024)return dtzNotify("Choose an image under 5 MB.");
+    if(file.size>8*1024*1024)return dtzNotify("Choose an image under 8 MB.");
     if(!["image/jpeg","image/png","image/webp"].includes(file.type))return dtzNotify("Choose a JPG, PNG or WebP image.");
-    try {dtzNotify("Uploading image...");await window.dtzSaveProfileImage(kind,file);}
-    catch(e){dtzNotify(e.message||"Upload failed.");}
+    dtzOpenImageCrop(kind,file);
   };input.click();
+}
+let dtzCropState=null;
+function dtzCloseImageCrop(){
+  if(dtzCropState?.url)URL.revokeObjectURL(dtzCropState.url);
+  dtzCropState=null;
+  document.getElementById("dtzCropOverlay")?.remove();
+}
+function dtzOpenImageCrop(kind,file){
+  dtzCloseImageCrop();
+  const url=URL.createObjectURL(file);
+  const image=new Image();
+  image.onload=()=>{
+    const wide=kind==="cover",cw=wide?1200:512,ch=wide?420:512;
+    const state={kind,url,image,scale:1,x:0,y:0};
+    dtzCropState=state;
+    const overlay=document.createElement("div");
+    overlay.id="dtzCropOverlay";overlay.className="dtz-crop-overlay";
+    overlay.innerHTML=`<div class="dtz-crop-dialog" role="dialog" aria-modal="true" aria-label="Position ${wide?'cover':'profile'} photo">
+      <h2>Position ${wide?'Cover':'Profile'} Photo</h2>
+      <p>Drag the photograph to reposition it. Use the slider to zoom.</p>
+      <div id="dtzCropViewport" class="dtz-crop-viewport ${wide?'wide':'square'}"><canvas id="dtzCropCanvas" width="${cw}" height="${ch}"></canvas></div>
+      <label for="dtzCropZoom">Zoom</label><input id="dtzCropZoom" type="range" min="1" max="3" step="0.01" value="1">
+      <div class="dtz-crop-actions"><button class="btn dark" onclick="dtzCloseImageCrop()">Cancel</button>
+      <button id="dtzCropSave" class="btn gold" onclick="dtzConfirmImageCrop()">Save Photo</button></div></div>`;
+    document.body.appendChild(overlay);
+    const viewport=document.getElementById("dtzCropViewport");
+    const canvas=document.getElementById("dtzCropCanvas");
+    const draw=()=>{
+      const ctx=canvas.getContext("2d");
+      ctx.clearRect(0,0,cw,ch);
+      const factor=Math.max(cw/image.width,ch/image.height)*state.scale;
+      const w=image.width*factor,h=image.height*factor;
+      const mx=Math.max(0,(w-cw)/2),my=Math.max(0,(h-ch)/2);
+      state.x=Math.max(-mx,Math.min(mx,state.x));
+      state.y=Math.max(-my,Math.min(my,state.y));
+      ctx.drawImage(image,(cw-w)/2+state.x,(ch-h)/2+state.y,w,h);
+    };
+    state.draw=draw;draw();
+    document.getElementById("dtzCropZoom").oninput=e=>{state.scale=Number(e.target.value);draw();};
+    let pointer=null;
+    viewport.onpointerdown=e=>{pointer={x:e.clientX,y:e.clientY};viewport.setPointerCapture(e.pointerId);};
+    viewport.onpointermove=e=>{
+      if(!pointer)return;
+      const rect=viewport.getBoundingClientRect();
+      state.x+=(e.clientX-pointer.x)*cw/rect.width;
+      state.y+=(e.clientY-pointer.y)*ch/rect.height;
+      pointer={x:e.clientX,y:e.clientY};draw();
+    };
+    viewport.onpointerup=viewport.onpointercancel=()=>{pointer=null;};
+  };
+  image.onerror=()=>{dtzCloseImageCrop();dtzNotify("Unable to read that image.");};
+  image.src=url;
+}
+async function dtzConfirmImageCrop(){
+  const state=dtzCropState;if(!state)return;
+  const button=document.getElementById("dtzCropSave");
+  button.disabled=true;button.textContent="Saving...";
+  try{
+    const canvas=document.getElementById("dtzCropCanvas");
+    const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error("Image processing failed.")),"image/webp",0.86));
+    await window.dtzSaveProfileImage(state.kind,new File([blob],state.kind+".webp",{type:"image/webp"}));
+    dtzCloseImageCrop();
+  }catch(e){dtzNotify(e.message||"Upload failed.");button.disabled=false;button.textContent="Save Photo";}
 }
 
 let dtzPeople=[],dtzPeopleFilter='all',dtzPeopleQuery='',dtzFollowedIds=new Set(),dtzViewedPerson=null;
@@ -1691,7 +1777,7 @@ function dtzRenderPost(p){
  <strong>${dtzEscape(p.author_name||'Member')}</strong><div class="dtz-post-meta">${dtzEscape(new Date(p.created_at).toLocaleString())}</div>
  ${p.shared_post_id?`<p class="dtz-share-note">Shared a community post</p>`:''}
  <p style="white-space:pre-wrap;overflow-wrap:anywhere">${dtzEscape(p.body)}</p>
- ${p.image_url?`<img class="dtz-post-photo" src="${dtzEscape(p.image_url)}" alt="Post photo" loading="lazy">`:''}
+ ${dtzPhotoIsVisible(p)?`<img class="dtz-post-photo" src="${dtzEscape(p.image_url)}" alt="Post photo" loading="lazy">`:''}
  ${p.shared_post_id?`<button class="dtz-post-link" onclick="dtzViewOriginal('${safeId}')">View original post</button>`:''}
  <div class="dtz-actions">
  <button class="dtz-action ${stats.mine==='checkered'?'selected':''}" aria-label="Checkered flag like" aria-pressed="${stats.mine==='checkered'}" onclick="dtzReact('${safeId}','checkered')">${dtzFlagSvg(true)}<span class="dtz-count">${stats.checkered}</span></button>
@@ -2316,15 +2402,37 @@ window.dtzSaveTrackFollow = async function(name) {
 window.dtzSaveProfileImage=async function(kind,file){
   const {data:{user},error:authError}=await supabase.auth.getUser();
   if(authError||!user)throw Error("Please sign in.");
+  if(!["avatar","cover"].includes(kind))throw Error("Invalid photo type.");
   const ext={"image/jpeg":"jpg","image/png":"png","image/webp":"webp"}[file.type];
   if(!ext)throw Error("Unsupported image type.");
+  const field=kind==="cover"?"cover_url":"avatar_url";
+  const {data:previousProfile,error:readError}=await supabase.from("profiles").select(field).eq("id",user.id).single();
+  if(readError)throw Error(readError.message);
+  const previous=previousProfile?.[field];
   const path=`${user.id}/${kind}-${crypto.randomUUID()}.${ext}`;
   const {error:uploadError}=await supabase.storage.from("profile-images").upload(path,file,{contentType:file.type,upsert:false});
   if(uploadError)throw Error(uploadError.message);
   const {data:publicData}=supabase.storage.from("profile-images").getPublicUrl(path);
-  const field=kind==="cover"?"cover_url":"avatar_url";
   const {error}=await supabase.from("profiles").update({[field]:publicData.publicUrl}).eq("id",user.id);
-  if(error)throw Error(error.message);
+  if(error){
+    await supabase.storage.from("profile-images").remove([path]);
+    throw Error(error.message);
+  }
+  // Only remove a prior image if it is owned by this user in our profile-images bucket.
+  if(previous && previous!==publicData.publicUrl){
+    try{
+      const marker="/storage/v1/object/public/profile-images/";
+      const parsed=new URL(previous);
+      const offset=parsed.pathname.indexOf(marker);
+      if(offset>=0){
+        const oldPath=decodeURIComponent(parsed.pathname.slice(offset+marker.length));
+        if(oldPath.startsWith(user.id+"/") && !oldPath.includes("..")){
+          const cleanup=await supabase.storage.from("profile-images").remove([oldPath]);
+          if(cleanup.error)console.warn("Previous profile photo cleanup failed:",cleanup.error.message);
+        }
+      }
+    }catch(e){console.warn("Previous profile photo cleanup failed:",e);}
+  }
   await routeToProfileIfNeeded(user);
   authMessage("Photo updated!");
 };
@@ -2359,6 +2467,15 @@ window.dtzLoadMyProfileData=async function(){
   if(posts.error)console.warn("Posts:",posts.error.message);
   if(follows.error)console.warn("Following:",follows.error.message);
   dtzOwnPosts=posts.data||[];dtzFollowing=follows.data||[];
+  // Gallery queries the full 30-day window, independent of the 50-post feed limit.
+  const cutoff=new Date(Date.now()-30*86400000).toISOString();
+  const {data:recentPhotos,error:galleryError}=await supabase.from("member_posts")
+    .select("id,author_id,body,image_url,created_at,shared_post_id")
+    .eq("author_id",user.id).gte("created_at",cutoff)
+    .not("image_url","is",null).is("shared_post_id",null)
+    .order("created_at",{ascending:false}).limit(1000);
+  if(galleryError)console.warn("Photo gallery could not load:",galleryError.message);
+  dtzMyRecentPhotos=recentPhotos||[];
   if(dtzPage==="my-profile")go("my-profile");
  window.dtzLoadPostStats?.(dtzOwnPosts);
 };
