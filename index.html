@@ -1581,10 +1581,46 @@ function dtzAdminPage(){
 
 let dtzCurrentUser = null;
 let dtzAuthReady = false;
+let dtzMemberProfile = null;
+function dtzMyProfilePage() {
+  if (!dtzCurrentUser) return `<div class="card pad"><h2>Sign in to view your profile</h2><button class="btn gold" onclick="openModal('account')">Sign In</button></div>`;
+  const p = dtzMemberProfile;
+  if (!p) return `<div class="card pad"><h2>Loading your profile...</h2></div>`;
+  const type = DTZ_TYPES.find(t => t[0] === p.account_type);
+  return `<div class="card">
+    <div class="profilehero"><div class="eyebrow">MY DIRT TRACKERZ PROFILE</div>
+    <h1>${dtzEscape(p.display_name)}</h1>
+    <p>${dtzEscape(type?.[1] || p.account_type)} · @${dtzEscape(p.username)}</p></div>
+    <div class="profilebody">
+    <p><strong>Hometown:</strong> ${dtzEscape(p.hometown || "Not added")} ${dtzEscape(p.state || "")}</p>
+    <p>${dtzEscape(p.bio || "Welcome to Dirt Trackerz!")}</p>
+    <div class="tabs">
+      <button class="btn gold" onclick="dtzEditMyProfile()">Edit Profile</button>
+      <button class="btn dark" onclick="dtzSignOut()">Sign Out</button>
+    </div></div></div>`;
+}
+function dtzEditMyProfile() {
+  if (!dtzCurrentUser) return;
+  openModal("account");
+  dtzAccountView("complete-profile");
+  const p = dtzMemberProfile;
+  if (!p) return;
+  for (const [id, value] of Object.entries({
+    dtzCompleteType:p.account_type, dtzCompleteName:p.display_name,
+    dtzCompleteUsername:p.username, dtzCompleteHometown:p.hometown,
+    dtzCompleteState:p.state, dtzCompleteBio:p.bio
+  })) {
+    const el=document.getElementById(id);
+    if(el) el.value=value || "";
+  }
+}
+window.dtzSetMemberProfile = function(profile) { dtzMemberProfile = profile; };
+
 
 function go(page) {
   const pages = {
     home: dtzHome,
+    "my-profile": dtzMyProfilePage,
     profiles: dtzProfilesPage,
     tracks: dtzTracksPage,
     "profile-detail": dtzProfileDetail,
@@ -1657,6 +1693,7 @@ function closeModal() {
   if (root) root.innerHTML = "";
 }
 
+
 function openModal(type) {
   if (type !== "account") return;
 
@@ -1671,30 +1708,32 @@ function openModal(type) {
         <div class="sectionhead">
           <h2>DIRT TRACKERZ ACCOUNT</h2>
           <button class="btn dark small"
-            onclick="closeModal()">
-            Close
-          </button>
+            onclick="closeModal()">Close</button>
         </div>
 
-        <div class="tabs">
-          <button class="btn gold small"
-            onclick="dtzAccountView('signin')">
-            Sign In
-          </button>
-
-          <button class="btn dark small"
-            onclick="dtzAccountView('signup')">
-            Create Account
-          </button>
-        </div>
+        ${dtzCurrentUser ? "" : `
+          <div class="tabs">
+            <button class="btn gold small"
+              onclick="dtzAccountView('signin')">Sign In</button>
+            <button class="btn dark small"
+              onclick="dtzAccountView('signup')">Create Account</button>
+          </div>
+        `}
 
         <div id="dtzAccountContent"></div>
       </div>
     </div>
   `;
 
-  dtzAccountView(dtzCurrentUser ? "account" : "signin");
+  if (dtzCurrentUser) {
+    dtzAccountView(dtzMemberProfile ? "account" : "complete-profile");
+  } else {
+    dtzAccountView("signin");
+  }
 }
+
+
+  
 
 function dtzAccountView(view) {
   const area = document.getElementById("dtzAccountContent");
@@ -1907,19 +1946,22 @@ function dtzSignOut() {
   }
 }
 
+
 function dtzUpdateAccountUI(user) {
   dtzCurrentUser = user || null;
-
-  const accountButtons = document.querySelectorAll(
-    '[onclick="openModal(\'account\')"]'
-  );
-
-  accountButtons.forEach(button => {
-    if (button.textContent.trim() === "Sign In") {
-      button.textContent = user ? "My Account" : "Sign In";
-    }
-  });
+  if (!user) dtzMemberProfile = null;
+  const button = document.getElementById("accountButton");
+  if (button) {
+    button.textContent = user ? "My Profile" : "Sign In / Join";
+    button.onclick = () => {
+      if (!dtzCurrentUser) return openModal("account");
+      if (dtzMemberProfile) return go("my-profile");
+      openModal("account");
+      dtzAccountView("complete-profile");
+    };
+  }
 }
+
 
 /* INITIAL WEBSITE RENDER */
 document.addEventListener("DOMContentLoaded", () => {
@@ -1988,18 +2030,24 @@ async function saveProfile(user, details) {
 
 async function routeToProfileIfNeeded(user) {
   if (!user) return;
-  const metadata = user.user_metadata || {};
-  if (metadata.dtz_profile_complete === true) return;
   const { data: profile, error } = await supabase.from("profiles")
-    .select("id,username,display_name,account_type")
+    .select("id,username,display_name,account_type,hometown,state,bio")
     .eq("id", user.id).maybeSingle();
-  if (error) { console.warn("Profile lookup:", error.message); return; }
-  // Older accounts with a populated profile are not forced through onboarding.
-  if (metadata.dtz_profile_complete !== false && profile?.username && profile?.display_name && profile?.account_type) return;
-  if (typeof window.openModal === "function") {
-    window.openModal("account");
-    window.dtzAccountView?.("complete-profile");
+  if (error) {
+    console.warn("Profile lookup:", error.message);
+    authMessage("Could not load your profile: " + getErrorMessage(error));
+    return;
   }
+  const complete = Boolean(profile?.username && profile?.display_name && profile?.account_type);
+  if (!complete) {
+    window.dtzSetMemberProfile?.(null);
+    window.openModal?.("account");
+    window.dtzAccountView?.("complete-profile");
+    return;
+  }
+  window.dtzSetMemberProfile?.(profile);
+  window.closeModal?.();
+  window.go?.("my-profile");
 }
 
 window.dtzSaveCompletedProfile = async function(details) {
@@ -2018,7 +2066,7 @@ window.dtzSaveCompletedProfile = async function(details) {
   });
   if (metadataError) throw new Error("Profile saved, but setup status could not be updated: " + getErrorMessage(metadataError));
   setAuthUser(data.user);
-  window.closeModal?.();
+  await routeToProfileIfNeeded(data.user);
   authMessage("Your Dirt Trackerz profile is ready!");
 };
 
@@ -2060,7 +2108,6 @@ window.dtzAuthSignup = async function(details) {
   }
 
   if (data.session && data.user) {
-    await saveProfile(data.user, details);
     setAuthUser(data.user);
     authMessage("Welcome to Dirt Trackerz!");
     await routeToProfileIfNeeded(data.user);
@@ -2181,18 +2228,6 @@ async function initializeAuth() {
 
   if (data?.user) {
     const user = data.user;
-    const details = user.user_metadata || {};
-
-    const { data: existingProfile } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (!existingProfile && details.username) {
-      await saveProfile(user, details);
-    }
-
     setAuthUser(user);
     await routeToProfileIfNeeded(user);
   } else {
