@@ -371,6 +371,37 @@ a{color:var(--gold)}
 .dtz-media-submit{width:100%;padding:16px}
 .dtz-media-submit:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.8)}
 </style>
+
+<style>
+/* DIRT TRACKERZ — metallic broadcast profile theme */
+.dtz-metal-profile{--pipe:#e8b84d;--pipe-shadow:#77500f}
+.dtz-metal-cover{height:clamp(170px,28vw,285px);position:relative;background:linear-gradient(115deg,#640a20,#ba1934,#160c13);border:3px solid #d5a744;border-bottom:5px solid #f1c85c;box-shadow:inset 0 2px 3px #fff8,0 5px 15px #000a;background-size:cover;background-position:center}
+.dtz-metal-cover .dtz-cover-edit{position:absolute;right:13px;top:13px}
+.dtz-metal-identity{background:linear-gradient(115deg,#2b0c14,#0e1014 70%);padding:19px 22px 24px;border:2px solid #6c421c;border-top:0;box-shadow:inset 0 1px #ffcc7040}
+.dtz-metal-identity .profilebar{align-items:center}
+.dtz-metal-avatar{width:96px;height:96px;min-width:96px;display:grid;place-items:center;padding:0;background:#24272e;color:#fff;border:5px ridge #e9b54a;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px #68400d,0 3px 16px #000b}
+.dtz-metal-identity h1{font-size:clamp(22px,3vw,34px);margin:0 0 5px}
+.dtz-metal-nav{display:grid;gap:13px;margin:21px 0}
+.dtz-metal-bar{width:100%;min-height:82px;display:flex;align-items:center;gap:18px;text-align:left;color:#fff;padding:12px 22px;border-radius:5px;border:5px ridge #e4b147;background:linear-gradient(180deg,#333238 0%,#08090c 28%,#17191e 75%,#07080a 100%);box-shadow:inset 0 2px 1px #fff7,inset 0 -3px 5px #000,0 4px 12px #000b;transition:filter .15s}
+.dtz-metal-bar:hover,.dtz-metal-bar:focus-visible{filter:brightness(1.18);outline:2px solid #fff2a8;outline-offset:2px}
+.dtz-metal-bar.active{background:linear-gradient(180deg,#6e0718,#c21933 50%,#3b0914);border-color:#ffd46b}
+.dtz-metal-bar .dtz-metal-icon{color:#ffd16a;flex:0 0 34px;display:grid;place-items:center}
+.dtz-metal-bar .dtz-metal-icon .ico,.dtz-metal-bar .dtz-metal-icon svg{width:29px;height:29px}
+.dtz-metal-bar strong{font-size:clamp(16px,2.5vw,23px);font-weight:1000;font-style:italic;letter-spacing:.6px;min-width:145px;text-shadow:0 2px 3px #000}
+.dtz-metal-bar .dtz-metal-desc{color:#d8d6d4;font-size:14px;border-left:1px solid #bda77d;padding-left:18px;flex:1}
+.dtz-metal-bar .dtz-metal-arrow{color:#f6c65c;font-size:30px;line-height:1}
+.dtz-metal-content{border:2px solid #997138;background:linear-gradient(145deg,#202329,#0d0e12);padding:18px;margin-bottom:22px;box-shadow:inset 0 1px #e9c57b55}
+.dtz-metal-content .card{background:#171a1f}
+@media(max-width:720px){
+ .dtz-metal-identity{padding:15px}
+ .dtz-metal-avatar{width:76px;height:76px;min-width:76px}
+ .dtz-metal-bar{min-height:74px;padding:10px 12px;gap:10px;border-width:4px}
+ .dtz-metal-bar strong{min-width:0;flex:1;font-size:17px}
+ .dtz-metal-bar .dtz-metal-desc{display:none}
+ .dtz-metal-bar .dtz-metal-arrow{font-size:23px}
+ .dtz-metal-identity .btn{font-size:12px}
+}
+</style>
 </head>
 <body>
 
@@ -1589,30 +1620,40 @@ let dtzFollowing = [];
 function dtzMyProfilePage() {
   if (!dtzCurrentUser) return `<div class="card pad"><h2>Sign in to view your profile</h2><button class="btn gold" onclick="openModal('account')">Sign In</button></div>`;
   const p=dtzMemberProfile;
-  if(!p) return `<div class="card pad"><h2>Complete your profile</h2><button class="btn gold" onclick="dtzEditMyProfile()">Complete Profile</button></div>`;
+  if(!p) return `<div class="card pad"><h2>Complete your profile</h2><p class="muted">Your account is signed in. Finish your profile to personalize your page.</p><button class="btn gold" onclick="dtzEditMyProfile()">Complete Profile</button></div>`;
   const type=DTZ_TYPES.find(t=>t[0]===p.account_type);
   const avatar=p.avatar_url?`<img src="${dtzEscape(p.avatar_url)}" alt="Profile photo" style="width:100%;height:100%;object-fit:cover">`:dtzIcon("user-round");
-  const cover=p.cover_url?`background-image:linear-gradient(0deg,#090a0c77,#090a0c22),url('${dtzEscape(p.cover_url)}');background-size:cover;background-position:center;`:"background:linear-gradient(115deg,#650d20,#bd1734,#211217);";
+  const cover=p.cover_url?`background-image:linear-gradient(0deg,#090a0c77,#090a0c22),url('${dtzEscape(p.cover_url)}');`:"";
   let content="";
   if(dtzProfileTab==="posts") content=`<div class="card pad"><h3>My Posts</h3><textarea id="dtzNewPost" class="field" rows="3" maxlength="3000" placeholder="Share your racing news..."></textarea><button class="btn gold" style="margin-top:10px" onclick="dtzPublishPost()">Publish Post</button></div>`+
     (dtzOwnPosts.length?dtzOwnPosts.map(x=>`<div class="card pad"><p>${dtzEscape(x.body)}</p><p class="tiny muted">${dtzEscape(new Date(x.created_at).toLocaleString())}</p></div>`).join(""):`<div class="card pad muted">Your posts will appear here.</div>`);
-  if(dtzProfileTab==="photos") content=`<div class="card pad"><h3>My Photos</h3><p>Your profile and cover photos appear above. A full photo-post gallery will be added when media uploads for posts are enabled.</p></div>`;
-  if(dtzProfileTab==="following") content=`<div class="card pad"><h3>Following</h3>${dtzFollowing.length?dtzFollowing.map(x=>`<p>${dtzEscape(x.track_name)}</p>`).join(""):"You haven't followed any tracks yet."}<button class="btn dark" onclick="go('tracks')">Discover Tracks</button></div>`;
-  if(dtzProfileTab==="about") content=`<div class="card pad"><h3>About</h3><p>${dtzEscape(p.bio||"No biography added yet.")}</p><p>${dtzEscape([p.hometown,p.state].filter(Boolean).join(", "))}</p><p>Account type: ${dtzEscape(type?.[1]||p.account_type)}</p></div>`;
-  return `<div class="card" style="overflow:hidden">
-    <div style="height:210px;position:relative;${cover}">
-      <button class="btn dark small" style="position:absolute;right:14px;top:14px" onclick="dtzUploadProfileImage('cover')">Edit Cover Photo</button>
+  if(dtzProfileTab==="photos") content=`<div class="card pad"><h3>My Photos</h3><p>Change your profile and cover photos above. Photo galleries for posts are coming in a later update.</p></div>`;
+  if(dtzProfileTab==="following") content=`<div class="card pad"><h3>Following</h3>${dtzFollowing.length?dtzFollowing.map(x=>`<p>${dtzEscape(x.track_name)}</p>`).join(""):"You haven't followed any tracks yet."}<button class="btn dark" onclick="go('tracks')">Discover Tracks</button> <button class="btn gold" onclick="dtzOpenFollowingFeed()">Following Feed</button></div>`;
+  if(dtzProfileTab==="about") content=`<div class="card pad"><h3>About Me</h3><p>${dtzEscape(p.bio||"No biography added yet.")}</p><p>${dtzEscape([p.hometown,p.state].filter(Boolean).join(", "))}</p><p>Account type: ${dtzEscape(type?.[1]||p.account_type)}</p></div>`;
+  const nav=[["posts","MY POSTS","Your personal racing updates","feed"],["photos","MY PHOTOS","Your racing photo gallery","media"],["following","FOLLOWING","Drivers, tracks and media you follow","profiles"],["about","ABOUT ME","Your racing information and biography","fan"]];
+  return `<section class="dtz-metal-profile">
+    <div class="dtz-metal-cover" style="${cover}">
+      <button class="btn dark small dtz-cover-edit" onclick="dtzUploadProfileImage('cover')">${dtzIcon("camera")} Edit Cover</button>
     </div>
-    <div class="profilebody">
+    <div class="dtz-metal-identity">
       <div class="profilebar">
-        <button onclick="dtzUploadProfileImage('avatar')" title="Change profile picture" style="width:94px;height:94px;border:3px solid #edbd60;border-radius:50%;overflow:hidden;background:#292d34;color:white;padding:0;display:grid;place-items:center">${avatar}</button>
+        <button class="dtz-metal-avatar" onclick="dtzUploadProfileImage('avatar')" aria-label="Change profile picture" title="Change profile picture">${avatar}</button>
         <div class="grow"><h1>${dtzEscape(p.display_name)}</h1><p class="muted">@${dtzEscape(p.username)} · ${dtzEscape(type?.[1]||p.account_type)}</p></div>
         <button class="btn gold" onclick="dtzEditMyProfile()">Edit Profile</button>
       </div>
-      <p class="tiny muted">Tap your profile picture to change it.</p>
-      <div class="tabs" style="margin-top:20px">${["posts","photos","following","about"].map(t=>`<button class="tab ${dtzProfileTab===t?"active":""}" onclick="dtzProfileTab='${t}';go('my-profile')">${t[0].toUpperCase()+t.slice(1)}</button>`).join("")}</div>
-    </div></div>${content}`;
+    </div>
+    <div class="dtz-metal-nav">${nav.map(([tab,label,description,icon])=>`
+      <button class="dtz-metal-bar ${dtzProfileTab===tab?"active":""}" onclick="dtzProfileTab='${tab}';go('my-profile')" aria-expanded="${dtzProfileTab===tab}">
+        <span class="dtz-metal-icon">${dtzIcon(DTZ_ICONS[icon]||icon)}</span>
+        <strong>${label}</strong>
+        <span class="dtz-metal-desc">${description}</span>
+        <span class="dtz-metal-arrow">›</span>
+      </button>
+      ${dtzProfileTab===tab?`<div class="dtz-metal-content">${content}</div>`:""}
+    `).join("")}</div>
+  </section>`;
 }
+
 function dtzEditMyProfile() {
   if (!dtzCurrentUser) return openModal("account");
   openModal("account");dtzAccountView("complete-profile");
